@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
+  <data name="AppTitle" xml:space="preserve"><value>Music &amp; Mind</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Nav_Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Nav_Science" xml:space="preserve"><value>Science</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>About</value></data>
+  <data name="Nav_Contact" xml:space="preserve"><value>Contact</value></data>
+  <data name="Hero_Headline" xml:space="preserve"><value>Soundscapes for Focus, Calm and Sleep</value></data>
+  <data name="Hero_Sub" xml:space="preserve"><value>Minimal, monochrome, modern. Press play and let the waves guide your mind.</value></data>
+  <data name="CTA_Listen" xml:space="preserve"><value>Listen now</value></data>
+  <data name="Section_Why" xml:space="preserve"><value>Why it works</value></data>
+  <data name="Why_Copy" xml:space="preserve"><value>Gentle amplitude modulations nudge neural rhythms: alpha for clarity, theta for creativity, gamma for drive.</value></data>
+  <data name="Footer_Tag" xml:space="preserve"><value>Sound as a neuro-instrument</value></data>
+  <data name="Focus_Title" xml:space="preserve"><value>Focus Sessions</value></data>
+  <data name="Science_Title" xml:space="preserve"><value>The Science</value></data>
+  <data name="About_Title" xml:space="preserve"><value>About</value></data>
+  <data name="Contact_Title" xml:space="preserve"><value>Contact</value></data>
+</root>

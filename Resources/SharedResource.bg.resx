@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
+  <data name="AppTitle" xml:space="preserve"><value>Music &amp; Mind</value></data>
+  <data name="Nav_Home" xml:space="preserve"><value>Начало</value></data>
+  <data name="Nav_Focus" xml:space="preserve"><value>Фокус</value></data>
+  <data name="Nav_Science" xml:space="preserve"><value>Наука</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>За нас</value></data>
+  <data name="Nav_Contact" xml:space="preserve"><value>Контакт</value></data>
+  <data name="Hero_Headline" xml:space="preserve"><value>Звукови пейзажи за фокус, спокойствие и сън</value></data>
+  <data name="Hero_Sub" xml:space="preserve"><value>Минималистично, монохромно, модерно. Натисни play и остави вълните да поведат ума.</value></data>
+  <data name="CTA_Listen" xml:space="preserve"><value>Слушай сега</value></data>
+  <data name="Section_Why" xml:space="preserve"><value>Защо работи</value></data>
+  <data name="Why_Copy" xml:space="preserve"><value>Фини амплитудни модулации подканват невронните ритми: алфа за яснота, тета за креативност, гама за устрем.</value></data>
+  <data name="Footer_Tag" xml:space="preserve"><value>Звукът като невро-инструмент</value></data>
+  <data name="Focus_Title" xml:space="preserve"><value>Сесии за фокус</value></data>
+  <data name="Science_Title" xml:space="preserve"><value>Наука</value></data>
+  <data name="About_Title" xml:space="preserve"><value>За нас</value></data>
+  <data name="Contact_Title" xml:space="preserve"><value>Контакт</value></data>
+</root>

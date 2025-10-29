@@ -1,0 +1,48 @@
+@using Microsoft.AspNetCore.Localization
+@inject Microsoft.Extensions.Localization.IStringLocalizerFactory Factory
+@{
+    var L = Factory.Create("SharedResource", "MusicAndMind2");
+}
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@ViewData["Title"] - @L["AppTitle"]</title>
+<link rel="stylesheet" href="/css/site.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+<header class="navbar">
+  <a class="brand" href="/">Music<span>&</span>Mind</a>
+  <nav class="menu">
+    <a href="/">@L["Home"]</a>
+    <a href="/Home/Focus">@L["Focus"]</a>
+    <a href="/Home/Science">@L["Science"]</a>
+    <a href="/Home/About">@L["About us"]</a>
+    <a href="/Home/Contact">@L["Contact us"]</a>
+  </nav>
+        <form class="lang" method="post" action="/Lang/Set">
+            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+            <select name="culture" onchange="this.form.submit()">
+
+                @if (System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName == "bg")
+                {
+                    <option value="bg" selected>Български</option>
+                    <option value="en">English</option>
+                }
+                else
+                {
+                    <option value="bg">Български</option>
+                    <option value="en" selected>English</option>
+                }
+
+            </select>
+        </form>
+
+</header>
+<main class="container">@RenderBody()</main>
+<footer class="footer"><p>© @DateTime.Now.Year Music & Mind • @L["Footer_Tag"]</p></footer>
+<script src="/js/site.js"></script>
+</body></html>

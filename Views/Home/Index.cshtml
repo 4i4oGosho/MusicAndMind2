@@ -1,0 +1,146 @@
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizerFactory Factory
+@{
+    var L = Factory.Create("SharedResource", typeof(Program).Assembly.FullName!);
+}
+
+<!-- HERO -->
+<section class="hero fade-in">
+    <div class="hero-copy fade-step">
+        <h1>@L["Music&Mind"]</h1>
+        <p class="lead">@L["Музиката и Човека"]</p>
+
+        <p class="tagline fade-step">
+            🎧 Където науката среща музиката.
+            🌌 Където мозъкът намира своя ритъм.
+        </p>
+
+        <a href="/Home/Focus" class="cta pulse">@L["Тракове"]</a>
+    </div>
+
+    <div class="hero-visual">
+        <div class="rings"></div>
+        <div class="rings rings-2"></div>
+        <div class="rings rings-3"></div>
+    </div>
+</section>
+
+
+<!-- WHY BLOCK -->
+<section class="columns fade-in">
+    <div>
+        <h2>@L["Какво са честотие?"]</h2>
+        <p>@L["За какво са на нас?"]</p>
+    </div>
+
+    <figure class="tilt fade-step">
+        <!-- ✅ Inline SVG Brainwaves -->
+        <svg width="100%" height="300" viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="300" fill="#0b0b0b" />
+            <path d="M0 150 C150 80,300 220,450 150 S750 80,900 150" fill="none" stroke="#ffffff" stroke-width="3" />
+            <circle cx="150" cy="110" r="6" fill="#4ce" />
+            <circle cx="450" cy="150" r="6" fill="#4ce" />
+            <circle cx="750" cy="110" r="6" fill="#4ce" />
+        </svg>
+        <figcaption>Честотите влияят на мозъчната активност. Това е реална невронаука.</figcaption>
+    </figure>
+</section>
+
+
+<!-- FEATURE CARDS -->
+<section class="grid fade-in" style="margin-top:50px">
+
+    <article class="card fade-step">
+        <h3>Фокус</h3>
+        <p>Ритми за ум, който остава тук и сега.</p>
+        <a href="/Home/Focus" class="small-btn">▶ Опитай</a>
+    </article>
+
+    <article class="card fade-step">
+        <h3>Наука</h3>
+        <p>Разберете как звукът пренастройва ума.</p>
+        <a href="/Home/Science" class="small-btn">▶ Научи</a>
+    </article>
+
+</section>
+
+
+<!-- SCROLL INVITE -->
+<section class="fade-in" style="text-align:center;margin:80px 0;">
+    <p style="font-size:22px;color:#b3b3b3">
+        Скролни надолу.<br>
+        <span style="font-size:28px;color:#fff">Това е само началото.</span>
+    </p>
+    <div class="scroll-indicator" style="margin-top:12px;font-size:40px">↓</div>
+</section>
+<!-- HOW SOUND HELPS -->
+<section class="columns fade-in" style="margin-top:100px;">
+    <figure class="tilt fade-step">
+        <svg width="100%" height="260" viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="260" fill="#0b0b0b" />
+            <path d="M0 160 C200 80,350 200,550 140 S850 80,900 160" stroke="#4ce" stroke-width="3" fill="none" />
+            <circle cx="550" cy="140" r="10" fill="#ffffff" />
+        </svg>
+        <figcaption>Мозъкът влиза в ритъм. Ритъмът носи яснота.</figcaption>
+    </figure>
+
+    <div class="fade-step">
+        <h2>Как звукът влияе на мозъка?</h2>
+        <p>
+            Ухото е най-прекият път към емоционалните центрове на мозъка.
+            Звукът може да:
+        </p>
+        <ul>
+            <li>🔥 увеличи фокуса</li>
+            <li>😌 намали тревожността</li>
+            <li>🧠 подобри паметта</li>
+            <li>🌙 спомогне за заспиване</li>
+        </ul>
+    </div>
+</section>
+
+
+
+<!-- BENEFITS GRID -->
+<section class="fade-in" style="margin-top:100px;">
+    <h2 style="text-align:center;">За кого е това?</h2>
+
+    <div class="grid fade-step" style="margin-top:30px;">
+        <article class="card tilt"><h3>Ученици & Студенти</h3><p>По-лесно учене и концентрация.</p></article>
+        <article class="card tilt"><h3>Работещи</h3><p>Фокус за задачи и творчество.</p></article>
+        <article class="card tilt"><h3>Тревожност</h3><p>Спокойствие и дишане.</p></article>
+        <article class="card tilt"><h3>ADHD</h3><p>Подкрепа на вниманието.</p></article>
+    </div>
+</section>
+
+
+
+<!-- SCIENCE VISUAL -->
+<section class="columns fade-in" style="margin-top:120px;">
+    <div class="fade-step">
+        <h2>Звуковите честоти като терапия</h2>
+        <p>
+            Специално подбрани честоти могат да стимулират
+            <strong>алфа, тета и гама</strong> мозъчни състояния за
+            продуктивност, креативност и дълбока почивка.
+        </p>
+    </div>
+
+    <figure class="tilt fade-step">
+        <svg width="100%" height="260" viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+            <rect width="900" height="260" fill="#0b0b0b" />
+            <path d="M0 130 Q200 30 450 130 T900 130" stroke="#ffffff" stroke-width="3" fill="none" />
+        </svg>
+        <figcaption>Науката, превърната в звук.</figcaption>
+    </figure>
+</section>
+
+
+
+<!-- FINAL CTA -->
+<section class="fade-in" style="margin-top:140px;text-align:center;">
+    <h2>Готов ли си да почувстваш промяната?</h2>
+    <p class="fade-step">🌌 Всеки звук е стъпка към по-добро теб.</p>
+    <a href="/Home/Focus" class="cta pulse" style="margin-top:20px;display:inline-block;">
+        Започни сега
+    </a>
+</section>
