@@ -364,3 +364,108 @@ figure {
         transform: translateY(0)
     }
 }
+/* 🌸 BACKGROUND SAKURA SCENE */
+body {
+    position: relative;
+    background: var(--bg) url("/images/sakura-bg.png") no-repeat center top fixed;
+    background-size: cover;
+    color: var(--fg);
+}
+
+    /* Тъмен overlay за четимост */
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(11,11,11,0.6);
+        z-index: -1;
+    }
+
+/* 🌸 Падащи листенца - подобрена версия */
+@keyframes sakuraFall {
+    0% {
+        transform: translateY(-10vh) translateX(0) rotate(0deg);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateY(110vh) translateX(50px) rotate(360deg);
+        opacity: 0.1;
+    }
+}
+
+.sakura-petal {
+    position: fixed;
+    top: -10vh;
+    background-image: url("/images/sakura-petal.png");
+    background-size: cover;
+    width: 12px; /* 🌸 по-малки листенца */
+    height: 12px;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 1;
+    animation: sakuraFall linear infinite;
+}
+
+    /* 🎐 Разпръснати позиции и скорости за естествен ефект */
+    .sakura-petal:nth-child(1) {
+        left: 5%;
+        animation-duration: 10s;
+        animation-delay: 0s;
+    }
+
+    .sakura-petal:nth-child(2) {
+        left: 15%;
+        animation-duration: 12s;
+        animation-delay: 2s;
+    }
+
+    .sakura-petal:nth-child(3) {
+        left: 25%;
+        animation-duration: 11s;
+        animation-delay: 4s;
+    }
+
+    .sakura-petal:nth-child(4) {
+        left: 35%;
+        animation-duration: 14s;
+        animation-delay: 1s;
+    }
+
+    .sakura-petal:nth-child(5) {
+        left: 45%;
+        animation-duration: 13s;
+        animation-delay: 3s;
+    }
+
+    .sakura-petal:nth-child(6) {
+        left: 55%;
+        animation-duration: 16s;
+        animation-delay: 2s;
+    }
+
+    .sakura-petal:nth-child(7) {
+        left: 65%;
+        animation-duration: 12s;
+        animation-delay: 1s;
+    }
+
+    .sakura-petal:nth-child(8) {
+        left: 75%;
+        animation-duration: 15s;
+        animation-delay: 4s;
+    }
+
+    .sakura-petal:nth-child(9) {
+        left: 85%;
+        animation-duration: 13s;
+        animation-delay: 0s;
+    }
+
+    .sakura-petal:nth-child(10) {
+        left: 95%;
+        animation-duration: 17s;
+        animation-delay: 3s;
+    }
+
+
