@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
 	  <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
 	  <TargetFramework>net8.0</TargetFramework>

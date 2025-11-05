@@ -1,19 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Localization;
 
 namespace MusicAndMind2.Controllers
 {
+    // Language endpoint removed — kept stub to avoid 404 if URL is requested.
     public class LangController : Controller
     {
+        [HttpGet]
         [HttpPost]
-        public IActionResult Set(string culture, string returnUrl = "/")
-        {
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-            );
-            return LocalRedirect(returnUrl);
-        }
+        public IActionResult Set() => NotFound();
     }
 }

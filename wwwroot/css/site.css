@@ -236,7 +236,7 @@ a {
         border-radius: 12px
     }
 
-/* ✅ NEW: Science Enhancements */
+    /* ✅ NEW: Science Enhancements */
 .fade-in {
     opacity: 0;
     animation: fadeIn 1.5s ease-out forwards;
@@ -364,7 +364,7 @@ figure {
         transform: translateY(0)
     }
 }
-/* 🌸 BACKGROUND SAKURA SCENE */
+ /* 🌸 BACKGROUND SAKURA SCENE */
 body {
     position: relative;
     background: var(--bg) url("/images/sakura-bg.png") no-repeat center top fixed;
@@ -381,95 +381,244 @@ body {
         z-index: -1;
     }
 
-/* ===========================================================
-   🌸 Sakura Petals Animation — Версия 2.0
-   По-гладки движения, естествено падане и различни скорости
-   Автор: Music & Mind Project
-   =========================================================== */
+@media (prefers-color-scheme: dark) {
+    /* ===========================================================
+       🌸 Sakura Petals Animation — Версия 2.0
+       По-гладки движения, естествено падане и различни скорости
+       Автор: Music & Mind Project
+       =========================================================== */
 
-/* 🌸 Падащи листенца - подобрена версия */
-@keyframes sakuraFall {
-    0% {
-        transform: translateY(-10vh) translateX(0) rotate(0deg);
-        opacity: 0.9;
+    /* 🌸 Падащи листенца - подобрена версия */
+    @keyframes sakuraFall {
+        0% {
+            transform: translateY(-10vh) translateX(0) rotate(0deg);
+            opacity: 0.9;
+        }
+
+        100% {
+            transform: translateY(110vh) translateX(50px) rotate(360deg);
+            opacity: 0.1;
+        }
     }
 
-    100% {
-        transform: translateY(110vh) translateX(50px) rotate(360deg);
-        opacity: 0.1;
+    .sakura-petal {
+        position: fixed;
+        top: -10vh;
+        background-image: url("/images/sakura-petal.png");
+        background-size: cover;
+        width: 12px; /* 🌸 по-малки листенца */
+        height: 12px;
+        opacity: 0.8;
+        pointer-events: none;
+        z-index: 1;
+        animation: sakuraFall linear infinite;
+    }
+
+        /* 🎐 Разпръснати позиции и скорости за естествен ефект */
+        .sakura-petal:nth-child(1) {
+            left: 5%;
+            animation-duration: 10s;
+            animation-delay: 0s;
+        }
+
+        .sakura-petal:nth-child(2) {
+            left: 15%;
+            animation-duration: 12s;
+            animation-delay: 2s;
+        }
+
+        .sakura-petal:nth-child(3) {
+            left: 25%;
+            animation-duration: 11s;
+            animation-delay: 4s;
+        }
+
+        .sakura-petal:nth-child(4) {
+            left: 35%;
+            animation-duration: 14s;
+            animation-delay: 1s;
+        }
+
+        .sakura-petal:nth-child(5) {
+            left: 45%;
+            animation-duration: 13s;
+            animation-delay: 3s;
+        }
+
+        .sakura-petal:nth-child(6) {
+            left: 55%;
+            animation-duration: 16s;
+            animation-delay: 2s;
+        }
+
+        .sakura-petal:nth-child(7) {
+            left: 65%;
+            animation-duration: 12s;
+            animation-delay: 1s;
+        }
+
+        .sakura-petal:nth-child(8) {
+            left: 75%;
+            animation-duration: 15s;
+            animation-delay: 4s;
+        }
+
+        .sakura-petal:nth-child(9) {
+            left: 85%;
+            animation-duration: 13s;
+            animation-delay: 0s;
+        }
+
+        .sakura-petal:nth-child(10) {
+            left: 95%;
+            animation-duration: 17s;
+            animation-delay: 3s;
+        }
+}
+
+/* === Theme & header layout tweaks (append to the end of site.css) === */
+
+/* Ensure navbar can position the centered menu */
+.navbar {
+    position: relative;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Center the menu horizontally without altering markup */
+.navbar .menu {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%); /* vertically center within navbar */
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Keep brand on the left (above rule doesn't change brand) */
+.navbar .brand {
+    z-index: 5; /* ensure visible over centered menu if necessary */
+}
+
+/* Style adjustments so centered menu doesn't overlap on small screens */
+@media (max-width: 900px) {
+    .navbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .navbar .menu {
+        position: static;
+        transform: none;
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+    }
+
+    .navbar .brand {
+        width: 100%;
+        text-align: left;
     }
 }
 
-.sakura-petal {
+/* Make space on the right in navbar for the theme toggle button */
+.navbar .mm-theme-toggle {
+    margin-left: auto;
+    z-index: 6;
+}
+
+/* If the toggle is appended to body fallback, center it bottom-right gracefully */
+body > .mm-theme-toggle {
     position: fixed;
-    top: -10vh;
-    background-image: url("/images/sakura-petal.png");
-    background-size: cover;
-    width: 12px; /* 🌸 по-малки листенца */
-    height: 12px;
-    opacity: 0.8;
-    pointer-events: none;
-    z-index: 1;
-    animation: sakuraFall linear infinite;
+    right: 16px;
+    bottom: 18px;
 }
 
-    /* 🎐 Разпръснати позиции и скорости за естествен ефект */
-    .sakura-petal:nth-child(1) {
-        left: 5%;
-        animation-duration: 10s;
-        animation-delay: 0s;
+/* Light theme: gentle card/border color adjustments for readability */
+body.theme-light {
+    color: var(--fg);
+}
+
+body.theme-light .card {
+    background: var(--card);
+    border-color: var(--line);
+    color: var(--fg);
+}
+
+/* Light-theme: toolbar (navbar) becomes translucent light surface, links and brand turn dark */
+body.theme-light .navbar {
+    background: rgba(255,255,255,0.80); /* translucent white instead of dark */
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #111;
+}
+
+/* Brand and menu link colors for light theme */
+body.theme-light .brand,
+body.theme-light .brand span {
+    color: #111;
+    opacity: 1;
+}
+
+body.theme-light .menu a {
+    color: #111;
+    opacity: 0.95;
+    font-weight: 600;
+}
+
+/* Ensure the theme toggle stays visible and matches the light toolbar */
+body.theme-light .mm-theme-toggle {
+    background: linear-gradient(180deg,#fff,#f6f6f6);
+    color: #111;
+    border-color: #e6e6e6;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Reduce contrast of the page overlay so the background image shows through more */
+body.theme-light::after {
+    background: rgba(255,255,255,0.12); /* keep slight wash for readability */
+    z-index: -1;
+}
+
+/* Small-screen fallback: keep toolbar readable */
+@media (max-width: 900px) {
+    body.theme-light .navbar {
+        background: rgba(255,255,255,0.95);
     }
 
-    .sakura-petal:nth-child(2) {
-        left: 15%;
-        animation-duration: 12s;
-        animation-delay: 2s;
+    body.theme-light .menu a {
+        color: #111;
     }
+}
 
-    .sakura-petal:nth-child(3) {
-        left: 25%;
-        animation-duration: 11s;
-        animation-delay: 4s;
-    }
+/* Restore: solid black buttons with white text in light theme (high specificity) */
+body.theme-light .btn,
+body.theme-light .controls .btn,
+body.theme-light .card .btn,
+body.theme-light .small-btn,
+body.theme-light .cta {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35) !important;
+    text-shadow: none !important;
+}
 
-    .sakura-petal:nth-child(4) {
-        left: 35%;
-        animation-duration: 14s;
-        animation-delay: 1s;
-    }
+/* Paused / secondary state */
+body.theme-light .btn.pause {
+    background: #111 !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,0.10) !important;
+}
 
-    .sakura-petal:nth-child(5) {
-        left: 45%;
-        animation-duration: 13s;
-        animation-delay: 3s;
-    }
-
-    .sakura-petal:nth-child(6) {
-        left: 55%;
-        animation-duration: 16s;
-        animation-delay: 2s;
-    }
-
-    .sakura-petal:nth-child(7) {
-        left: 65%;
-        animation-duration: 12s;
-        animation-delay: 1s;
-    }
-
-    .sakura-petal:nth-child(8) {
-        left: 75%;
-        animation-duration: 15s;
-        animation-delay: 4s;
-    }
-
-    .sakura-petal:nth-child(9) {
-        left: 85%;
-        animation-duration: 13s;
-        animation-delay: 0s;
-    }
-
-    .sakura-petal:nth-child(10) {
-        left: 95%;
-        animation-duration: 17s;
-        animation-delay: 3s;
-    }
+/* Keep disabled state readable */
+body.theme-light .btn[disabled],
+body.theme-light .small-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

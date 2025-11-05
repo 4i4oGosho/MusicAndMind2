@@ -23,30 +23,12 @@
     <a href="/Home/About">@L["About us"]</a>
     <a href="/Home/Contact">@L["Contact us"]</a>
   </nav>
-        <form class="lang" method="post" action="/Lang/Set">
-            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-            <select name="culture" onchange="this.form.submit()">
-
-                @if (System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName == "bg")
-                {
-                    <option value="bg" selected>Български</option>
-                    <option value="en">English</option>
-                }
-                else
-                {
-                    <option value="bg">Български</option>
-                    <option value="en" selected>English</option>
-                }
-
-            </select>
-        </form>
-
+  <!-- Language selector removed — site stays Bulgarian -->
 </header>
 <main class="container">@RenderBody()</main>
 <footer class="footer"><p>© @DateTime.Now.Year Music & Mind • @L["Footer_Tag"]</p></footer>
 <script src="/js/site.js"></script>
     <!-- Sakura petals floating across the page -->
-    <!-- Sakura petals floating across the page -->
     <div class="sakura-petal"></div>
     <div class="sakura-petal"></div>
     <div class="sakura-petal"></div>
@@ -59,6 +41,5 @@
     <div class="sakura-petal"></div>
     <div class="sakura-petal"></div>
     <div class="sakura-petal"></div>
-
 
 </body></html>
