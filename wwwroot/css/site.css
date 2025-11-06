@@ -381,99 +381,192 @@ body {
         z-index: -1;
     }
 
-@media (prefers-color-scheme: dark) {
-    /* ===========================================================
-       🌸 Sakura Petals Animation — Версия 2.0
-       По-гладки движения, естествено падане и различни скорости
-       Автор: Music & Mind Project
-       =========================================================== */
+/* -----------------------------
+   Sakura petals — improved animation
+   - Use the existing /images/sakura-petal.png
+   - Petals fall from both sides; odd petals drift L→R, even R→L
+   - Different sizes, speeds and delays for natural effect
+   ----------------------------- */
 
-    /* 🌸 Падащи листенца - подобрена версия */
-    @keyframes sakuraFall {
-        0% {
-            transform: translateY(-10vh) translateX(0) rotate(0deg);
-            opacity: 0.9;
-        }
+/* base petal */
+.sakura-petal {
+    position: fixed;
+    top: -12vh;
+    width: 14px;
+    height: 14px;
+    background-image: url("/images/sakura-petal.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.9;
+    transform-origin: center;
+    will-change: transform, opacity;
+    /* accessible animation defaults; per-item overrides below */
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+}
 
-        100% {
-            transform: translateY(110vh) translateX(50px) rotate(360deg);
-            opacity: 0.1;
-        }
+/* gentle left-to-right path */
+@keyframes sakuraFallLR {
+    0% {
+        transform: translate3d(0, -10vh, 0) rotate(0deg) scale(1);
+        opacity: 0.95;
     }
+    25% {
+        transform: translate3d(6vw, 25vh, 0) rotate(45deg) scale(0.98);
+        opacity: 0.9;
+    }
+    55% {
+        transform: translate3d(18vw, 65vh, 0) rotate(180deg) scale(0.95);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(40vw, 110vh, 0) rotate(360deg) scale(0.9);
+        opacity: 0.08;
+    }
+}
 
+/* gentle right-to-left path */
+@keyframes sakuraFallRL {
+    0% {
+        transform: translate3d(0, -10vh, 0) rotate(0deg) scale(1);
+        opacity: 0.95;
+    }
+    25% {
+        transform: translate3d(-6vw, 25vh, 0) rotate(-45deg) scale(0.98);
+        opacity: 0.9;
+    }
+    55% {
+        transform: translate3d(-18vw, 65vh, 0) rotate(-180deg) scale(0.95);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(-40vw, 110vh, 0) rotate(-360deg) scale(0.9);
+        opacity: 0.08;
+    }
+}
+
+/* spread start positions and natural variation */
+/* There are 12 .sakura-petal divs in the layout — style each for variety */
+.sakura-petal:nth-child(1) {
+    left: 4%;
+    width: 12px; height:12px;
+    animation-name: sakuraFallLR;
+    animation-duration: 11s;
+    animation-delay: 0s;
+    opacity: 0.95;
+}
+.sakura-petal:nth-child(2) {
+    left: 92%;
+    width: 16px; height:16px;
+    animation-name: sakuraFallRL;
+    animation-duration: 14s;
+    animation-delay: 1.8s;
+    opacity: 0.88;
+}
+.sakura-petal:nth-child(3) {
+    left: 12%;
+    width: 13px; height:13px;
+    animation-name: sakuraFallLR;
+    animation-duration: 12.5s;
+    animation-delay: 0.6s;
+    opacity: 0.92;
+}
+.sakura-petal:nth-child(4) {
+    left: 80%;
+    width: 10px; height:10px;
+    animation-name: sakuraFallRL;
+    animation-duration: 10.5s;
+    animation-delay: 2.5s;
+    opacity: 0.86;
+}
+.sakura-petal:nth-child(5) {
+    left: 22%;
+    width: 18px; height:18px;
+    animation-name: sakuraFallLR;
+    animation-duration: 15s;
+    animation-delay: 1s;
+    opacity: 0.9;
+}
+.sakura-petal:nth-child(6) {
+    left: 72%;
+    width: 11px; height:11px;
+    animation-name: sakuraFallRL;
+    animation-duration: 13s;
+    animation-delay: 0.2s;
+    opacity: 0.9;
+}
+.sakura-petal:nth-child(7) {
+    left: 30%;
+    width: 14px; height:14px;
+    animation-name: sakuraFallLR;
+    animation-duration: 16s;
+    animation-delay: 3s;
+    opacity: 0.92;
+}
+.sakura-petal:nth-child(8) {
+    left: 62%;
+    width: 15px; height:15px;
+    animation-name: sakuraFallRL;
+    animation-duration: 17s;
+    animation-delay: 1.2s;
+    opacity: 0.87;
+}
+.sakura-petal:nth-child(9) {
+    left: 40%;
+    width: 12px; height:12px;
+    animation-name: sakuraFallLR;
+    animation-duration: 12s;
+    animation-delay: 2.2s;
+    opacity: 0.9;
+}
+.sakura-petal:nth-child(10) {
+    left: 54%;
+    width: 10px; height:10px;
+    animation-name: sakuraFallRL;
+    animation-duration: 11.5s;
+    animation-delay: 0.9s;
+    opacity: 0.85;
+}
+.sakura-petal:nth-child(11) {
+    left: 48%;
+    width: 19px; height:19px;
+    animation-name: sakuraFallLR;
+    animation-duration: 18s;
+    animation-delay: 4s;
+    opacity: 0.94;
+}
+.sakura-petal:nth-child(12) {
+    left: 88%;
+    width: 13px; height:13px;
+    animation-name: sakuraFallRL;
+    animation-duration: 19s;
+    animation-delay: 2.8s;
+    opacity: 0.86;
+}
+
+/* make sure petals remain visible above content but below UI elements like navbar toggle */
+.sakura-petal {
+    z-index: 5;
+}
+
+/* slight shadow for light theme so petals read against bright background */
+body.theme-light .sakura-petal {
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.18));
+}
+
+/* Reduce motion preference respect */
+@media (prefers-reduced-motion: reduce) {
     .sakura-petal {
-        position: fixed;
-        top: -10vh;
-        background-image: url("/images/sakura-petal.png");
-        background-size: cover;
-        width: 12px; /* 🌸 по-малки листенца */
-        height: 12px;
-        opacity: 0.8;
-        pointer-events: none;
-        z-index: 1;
-        animation: sakuraFall linear infinite;
+        display: none;
     }
+}
 
-        /* 🎐 Разпръснати позиции и скорости за естествен ефект */
-        .sakura-petal:nth-child(1) {
-            left: 5%;
-            animation-duration: 10s;
-            animation-delay: 0s;
-        }
-
-        .sakura-petal:nth-child(2) {
-            left: 15%;
-            animation-duration: 12s;
-            animation-delay: 2s;
-        }
-
-        .sakura-petal:nth-child(3) {
-            left: 25%;
-            animation-duration: 11s;
-            animation-delay: 4s;
-        }
-
-        .sakura-petal:nth-child(4) {
-            left: 35%;
-            animation-duration: 14s;
-            animation-delay: 1s;
-        }
-
-        .sakura-petal:nth-child(5) {
-            left: 45%;
-            animation-duration: 13s;
-            animation-delay: 3s;
-        }
-
-        .sakura-petal:nth-child(6) {
-            left: 55%;
-            animation-duration: 16s;
-            animation-delay: 2s;
-        }
-
-        .sakura-petal:nth-child(7) {
-            left: 65%;
-            animation-duration: 12s;
-            animation-delay: 1s;
-        }
-
-        .sakura-petal:nth-child(8) {
-            left: 75%;
-            animation-duration: 15s;
-            animation-delay: 4s;
-        }
-
-        .sakura-petal:nth-child(9) {
-            left: 85%;
-            animation-duration: 13s;
-            animation-delay: 0s;
-        }
-
-        .sakura-petal:nth-child(10) {
-            left: 95%;
-            animation-duration: 17s;
-            animation-delay: 3s;
-        }
+@media (max-width: 900px) {
+    /* fewer petals on small screens to keep things pleasant */
+    .sakura-petal:nth-child(n+7) { display: none; }
 }
 
 /* === Theme & header layout tweaks (append to the end of site.css) === */
@@ -621,4 +714,97 @@ body.theme-light .btn[disabled],
 body.theme-light .small-btn[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* -----------------------
+   ADDED: Additional light-mode overrides for readable text and SVGs
+   ----------------------- */
+
+/* Ensure base text is dark in light theme (stronger than earlier var usage) */
+body.theme-light {
+    color: #111 !important;
+}
+
+/* Headings, paragraphs, list items, captions and general content should be dark */
+body.theme-light h1,
+body.theme-light h2,
+body.theme-light h3,
+body.theme-light h4,
+body.theme-light h5,
+body.theme-light h6,
+body.theme-light p,
+body.theme-light li,
+body.theme-light figcaption,
+body.theme-light .lead,
+body.theme-light .tagline {
+    color: #111 !important;
+}
+
+/* Links in light theme should be dark and clearly visible */
+body.theme-light a {
+    color: #0b0b0b !important;
+}
+
+/* Specific: override inline color="#fff" occurrences used in markup */
+body.theme-light [style*="color: #fff"],
+body.theme-light [style*="color:#fff"],
+body.theme-light [style*="color: #ffffff"],
+body.theme-light [style*="color:#ffffff"] {
+    color: #111 !important;
+}
+
+/* Hero inline span white -> dark in light theme (covers the explicit inline span used in Index) */
+body.theme-light .hero-copy span,
+body.theme-light .hero-copy .tagline span,
+body.theme-light .hero-copy p span {
+    color: #111 !important;
+}
+
+/* Force inline SVG graphics to render in dark color for light theme:
+   override fills and strokes so icons/illustrations remain readable */
+body.theme-light svg,
+body.theme-light svg * {
+    fill: #111 !important;
+    stroke: #111 !important;
+    color: #111 !important;
+}
+
+/* Make SVG rects (used as dark backgrounds in SVGs) transparent in light theme
+   so the light background image shows through */
+body.theme-light svg rect {
+    fill: transparent !important;
+}
+
+/* Subtle muted text color on light background */
+body.theme-light .lead,
+body.theme-light .muted {
+    color: #6b6b6b !important;
+}
+
+/* Cards should display dark text */
+body.theme-light .card {
+    color: #111 !important;
+}
+
+/* Tag / figcaption contrast on light background */
+body.theme-light .tag,
+body.theme-light figcaption {
+    color: #222 !important;
+    border-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Footer adjustments for light theme */
+body.theme-light .footer {
+    color: #6b6b6b !important;
+    border-top-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Keep decorative rings subtle on light background */
+body.theme-light .rings {
+    border-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Scroll indicator readability */
+body.theme-light .scroll-indicator {
+    color: #111 !important;
 }
