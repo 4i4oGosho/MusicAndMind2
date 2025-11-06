@@ -808,3 +808,29 @@ body.theme-light .rings {
 body.theme-light .scroll-indicator {
     color: #111 !important;
 }
+/* ✅ Подравняване на всички карти в една мрежа без да пипаме HTML */
+.prose.focus {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+    /* По подразбиране всичко да е на цяла ширина... */
+    .prose.focus > * {
+        grid-column: 1 / -1;
+    }
+
+    /* ...но картите да текат като плочки (включително тези след .grid) */
+    .prose.focus .grid {
+        display: contents; /* “разтваря” .grid, за да станат децата й директни grid items */
+    }
+
+    .prose.focus article.card {
+        grid-column: auto; /* позволява на всички .card да заемат колонки */
+    }
+
+    /* По желание: фиксирай височина за по-равни редове */
+    .prose.focus .card .card-body {
+        min-height: 180px;
+    }
+
