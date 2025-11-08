@@ -1,0 +1,33 @@
+﻿@model MusicAndMind2.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<section class="auth-wrapper">
+    <div class="auth-card">
+        <h2>🎧 Вход</h2>
+
+        <form asp-action="Login" method="post" class="auth-form">
+            <div class="input-group">
+                <label asp-for="Email">Имейл</label>
+                <input asp-for="Email" placeholder="example@email.com" required />
+            </div>
+
+            <div class="input-group">
+                <label asp-for="Password">Парола</label>
+                <input asp-for="Password" type="password" placeholder="••••••••" required />
+            </div>
+
+            <div class="remember-row">
+                <input asp-for="RememberMe" type="checkbox" id="remember" />
+                <label for="remember">Запомни ме</label>
+            </div>
+
+            <button type="submit" class="btn-fancy">Вход</button>
+
+            <p class="auth-switch">
+                Нямаш акаунт? <a href="/Auth/Register">Регистрация</a>
+            </p>
+        </form>
+    </div>
+</section>

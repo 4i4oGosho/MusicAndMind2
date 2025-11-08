@@ -1,4 +1,7 @@
 @using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 @inject Microsoft.Extensions.Localization.IStringLocalizerFactory Factory
 @{
     var L = Factory.Create("SharedResource", "MusicAndMind2");
@@ -7,39 +10,157 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>@ViewData["Title"] - @L["AppTitle"]</title>
-<link rel="stylesheet" href="/css/site.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - @L["AppTitle"]</title>
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body class="theme-dark">
-<header class="navbar">
-  <a class="brand" href="/">Music<span>&</span>Mind</a>
-  <nav class="menu">
-    <a href="/">@L["Начало"]</a>
-    <a href="/Home/Focus">@L["Фокус"]</a>
-    <a href="/Home/Science">@L["Наука"]</a>
-    <a href="/Home/About">@L["За нас"]</a>
-    <a href="/Home/Contact">@L["Контакти"]</a>
-  </nav>
-  <!-- Language selector removed — site stays Bulgarian -->
-</header>
-<main class="container">@RenderBody()</main>
-    <footer class="footer"><p>© @DateTime.Now.Year Music & Mind • @L["@이레네🦋"]</p></footer>
-<script src="/js/site.js"></script>
-    <!-- Sakura petals floating across the page -->
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
-    <div class="sakura-petal"></div>
+    <header class="navbar">
+        <div class="nav-left">
+            <a class="brand" href="/">Music<span>&</span>Mind</a>
 
-</body></html>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="/Admin" class="admin-link">Админ</a>
+            }
+
+            <nav class="menu">
+                <a href="/">@L["Начало"]</a>
+                <a href="/Home/Focus">@L["Фокус"]</a>
+                <a href="/Home/Science">@L["Наука"]</a>
+                <a href="/Home/About">@L["За нас"]</a>
+                <a href="/Home/Contact">@L["Контакти"]</a>
+            </nav>
+        </div>
+
+        <div class="nav-right">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <span class="user-info">👤 @UserManager.GetUserName(User)</span>
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
+                    <button type="submit" class="btn-logout">@L["Изход"]</button>
+                </form>
+            }
+            else
+            {
+                <a href="/Auth/Login" class="auth-link">@L["Вход"]</a>
+                <a href="/Auth/Register" class="auth-link">@L["Регистрация"]</a>
+            }
+        </div>
+    </header>
+
+    <main class="container">@RenderBody()</main>
+
+    <footer class="footer">
+        <p>© @DateTime.Now.Year Music & Mind • @L["@이레네🦋"]</p>
+    </footer>
+
+    <script src="/js/site.js"></script>
+
+    <!-- Sakura petals -->
+    @for (int i = 0; i < 12; i++)
+    {
+        <div class="sakura-petal"></div>
+    }
+
+    <style>
+        /* Запазваме твоя красив фон и стил */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            position: relative;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-color, #fff);
+            text-decoration: none;
+        }
+
+        .menu {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        /* 🌸 Важно: само леко изместваме бутоните вляво */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: absolute;
+            right: 9rem; /* преди беше 6rem → само мръднато малко вляво */
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+
+        .auth-link {
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--text-color, #fff);
+            transition: opacity 0.2s ease;
+        }
+
+            .auth-link:hover {
+                opacity: 0.7;
+            }
+
+        .logout-form {
+            display: inline;
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--text-color, #fff);
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.2s ease;
+        }
+
+            .btn-logout:hover {
+                opacity: 0.7;
+            }
+
+        .user-info {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        /* 🌸 Стил за админ бутона до логото */
+        .admin-link {
+            margin-left: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--text-color, #fff);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.4rem 0.9rem;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 10px rgba(255,255,255,0.05);
+        }
+
+            .admin-link:hover {
+                background: var(--accent-color, #ff69b4);
+                color: #fff;
+                box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+            }
+
+    </style>
+
+
+</body>
+</html>
+

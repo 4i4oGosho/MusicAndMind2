@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+@{
+    ViewData["Title"] = "Потребители";
+}
+
+<h2 style="text-align:center; margin-top:2rem;">Всички регистрирани акаунти</h2>
+
+<table style="margin:auto; margin-top:2rem; border-collapse:collapse; width:80%; color:white;">
+    <thead style="background-color:rgba(255,255,255,0.1);">
+        <tr>
+            <th style="padding:0.8rem;">Имейл</th>
+            <th style="padding:0.8rem;">Потвърден</th>
+            <th style="padding:0.8rem;">Id</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <td style="padding:0.8rem;">@user.Email</td>
+                <td style="padding:0.8rem;">@(user.EmailConfirmed ? "✅" : "❌")</td>
+                <td style="padding:0.8rem;">@user.Id</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<style>
+    table {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+</style>

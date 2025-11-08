@@ -833,4 +833,195 @@ body.theme-light .scroll-indicator {
     .prose.focus .card .card-body {
         min-height: 180px;
     }
+.auth-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+}
+
+.auth-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem 3rem;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+    .auth-box h2 {
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+.auth-form .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-color);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+    .auth-button:hover {
+        transform: scale(1.03);
+    }
+
+.auth-switch {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+    .auth-switch a {
+        color: var(--accent-color);
+        font-weight: 600;
+    }
+/* 🌸 Центриран контейнер */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+}
+
+/* 🌸 Карта за login формата */
+.auth-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 2.5rem 3rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    animation: floatUp 0.6s ease forwards;
+}
+
+/* 🌸 Плавно издигане при зареждане */
+@keyframes floatUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-card h2 {
+    color: var(--text-color, #fff);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* 🌸 Полета */
+.input-group {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+    .input-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-color, #fff);
+        margin-bottom: 0.3rem;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border-radius: 10px;
+        border: none;
+        background: rgba(255, 255, 255, 0.85);
+        outline: none;
+        transition: box-shadow 0.2s ease;
+    }
+
+        .input-group input:focus {
+            box-shadow: 0 0 10px var(--accent-color, #ff69b4);
+        }
+
+/* 🌸 Чекбокс ред */
+.remember-row {
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--text-color, #fff);
+    margin: 1rem 0;
+}
+
+/* 🌸 Анимиран бутон */
+.btn-fancy {
+    width: 100%;
+    background: var(--accent-color, #ff69b4);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+    .btn-fancy::before {
+        content: "";
+        position: absolute;
+        left: -75px;
+        top: 0;
+        width: 50px;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: skewX(-20deg);
+        transition: left 0.4s ease;
+    }
+
+    .btn-fancy:hover::before {
+        left: 110%;
+    }
+
+    .btn-fancy:hover {
+        transform: scale(1.03);
+    }
+
+/* 🌸 Текст под формата */
+.auth-switch {
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+}
+
+    .auth-switch a {
+        color: var(--accent-color, #ff69b4);
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+    }
+
+        .auth-switch a:hover {
+            opacity: 0.8;
+        }
 
