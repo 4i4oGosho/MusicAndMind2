@@ -1,0 +1,84 @@
+﻿@model List<MusicAndMind2.Models.Product>
+
+@{
+    ViewData["Title"] = "Вашата кошница";
+}
+
+<section class="cart-container">
+    <h1>🛒 ВАШАТА КОШНИЦА</h1>
+
+    @if (!Model.Any())
+    {
+        <p>Кошницата е празна... 🕊️</p>
+        <a href="/Shop" class="btn-back">⬅ Върни се в магазина</a>
+    }
+    else
+    {
+        <ul class="cart-list">
+            @foreach (var item in Model)
+            {
+                <li class="cart-item">
+                    <img src="@item.ImageUrl" alt="@item.Name" />
+                    <div class="cart-info">
+                        <h3>@item.Name</h3>
+                        <p>@item.Price лв.</p>
+                        <form asp-action="RemoveFromCart" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn-remove">Премахни</button>
+                        </form>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <form asp-action="ClearCart" method="post">
+            <button class="btn-clear">🧹 Изчисти кошницата</button>
+        </form>
+    }
+</section>
+
+<style>
+    .cart-container {
+        text-align: center;
+        padding: 2rem;
+        color: #fff;
+    }
+
+    .cart-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+        }
+
+    .btn-remove, .btn-clear, .btn-back {
+        background: #ff69b4;
+        border: none;
+        padding: 0.5rem 1rem;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-remove:hover, .btn-clear:hover, .btn-back:hover {
+            background: #ff8ac9;
+        }
+</style>

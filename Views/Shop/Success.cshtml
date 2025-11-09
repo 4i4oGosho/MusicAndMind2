@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Благодарим за поръчката!";
+}
+
+<div class="checkout-success">
+    <h2>🌸 Благодарим за покупката!</h2>
+    <p>Продукт: <strong>@ViewBag.ProductName</strong></p>
+    <p>Цена: <strong>@ViewBag.Price лв.</strong></p>
+    <p>Начин на плащане: <strong>@ViewBag.Payment</strong></p>
+    <p>Ще се свържем с вас с потвърждение и информация за доставка 💌</p>
+
+    <a href="/Shop" class="back-btn">⬅ Върни се в магазина</a>
+</div>
+
+<style>
+    .checkout-success {
+        text-align: center;
+        margin: 4rem auto;
+        max-width: 600px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+
+        .checkout-success h2 {
+            color: #ff69b4;
+            margin-bottom: 1rem;
+        }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 2rem;
+        padding: 0.6rem 1.2rem;
+        background: hotpink;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: 0.25s ease;
+    }
+
+        .back-btn:hover {
+            background: #ff85c2;
+        }
+</style>

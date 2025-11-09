@@ -1,0 +1,193 @@
+﻿@model IEnumerable<MusicAndMind2.Models.Product>
+
+@{
+    ViewData["Title"] = "Магазин";
+}
+
+<div class="shop-container">
+    <h1 class="shop-title">🕉 Магазин на Music & Mind 🕉</h1>
+    <p class="shop-subtitle">Инструменти, които хармонизират ума чрез звук и вибрация.</p>
+
+    <div class="product-grid">
+        @foreach (var item in Model)
+        {
+            <div class="product-card">
+                <img src="@item.ImageUrl" alt="@item.Name" class="product-image" />
+
+                <h3 class="product-name">@item.Name</h3>
+                <p class="product-description">@item.Description</p>
+                <p class="product-frequency">🧠 @item.FrequencyInfo</p>
+
+                <audio controls class="product-audio">
+                    <source src="@item.SoundUrl" type="audio/mp3" />
+                    Вашият браузър не поддържа аудио елемента.
+                </audio>
+
+                <div class="product-footer">
+                    <span class="product-price">@item.Price лв.</span>
+
+                    <form action="/Shop/Checkout" method="post" class="product-form">
+                        <input type="hidden" name="productId" value="@item.Id" />
+
+                        <select name="paymentMethod" class="payment-select">
+                            <option value="card">💳 Карта</option>
+                            <option value="cod">🚚 Наложен платеж</option>
+                        </select>
+
+                        <button type="submit" class="btn-buy">Купи</button>
+                    </form>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .shop-container {
+        color: #fff;
+        padding: 3rem 1rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .shop-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+
+    .shop-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-bottom: 3rem;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 2rem;
+        justify-items: center;
+    }
+
+    .product-card {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 1.2rem;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 300px;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .product-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,105,180,0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
+        }
+
+    .product-image {
+        width: 100%;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .product-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        min-height: 60px;
+    }
+
+    .product-frequency {
+        font-size: 0.85rem;
+        color: #f9b4f4;
+        margin-top: 0.3rem;
+    }
+
+    .product-audio {
+        width: 100%;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 0 4px rgba(255,105,180,0.2));
+    }
+
+    .product-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product-price {
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .payment-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        padding: 0.4rem;
+        border-radius: 0.5rem;
+        width: 80%;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .btn-buy {
+        background: #ff69b4;
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 0.7rem;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn-buy:hover {
+            background: #ff85c0;
+            transform: scale(1.05);
+        }
+    /* 💡 Поправка: позволяваме клик върху бутона */
+    .product-card::before {
+        pointer-events: none;
+    }
+
+    .btn-buy {
+        position: relative;
+        z-index: 10;
+    }
+
+</style>

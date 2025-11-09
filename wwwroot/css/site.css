@@ -1024,4 +1024,13 @@ body.theme-light .scroll-indicator {
         .auth-switch a:hover {
             opacity: 0.8;
         }
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+}
 

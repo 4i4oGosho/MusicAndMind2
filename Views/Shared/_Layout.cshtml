@@ -1,10 +1,20 @@
 @using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Identity
+@using MusicAndMind2.Models
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 @inject Microsoft.Extensions.Localization.IStringLocalizerFactory Factory
 @{
     var L = Factory.Create("SharedResource", "MusicAndMind2");
+
+    // 🧮 Взимаме броя на продуктите от сесията
+    int cartCount = 0;
+    var cartJson = Context.Session.GetString("CartItems");
+    if (!string.IsNullOrEmpty(cartJson))
+    {
+        var cartList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Product>>(cartJson);
+        cartCount = cartList?.Count ?? 0;
+    }
 }
 
 <!DOCTYPE html>
@@ -22,6 +32,16 @@
     <header class="navbar">
         <div class="nav-left">
             <a class="brand" href="/">Music<span>&</span>Mind</a>
+
+            <a href="/Shop" class="shop-link" title="Магазин">
+                Магазин
+            </a>
+
+            <!-- 🛒 Количка -->
+            <a href="/Cart" class="cart-icon" id="cart-icon" title="Кошница">
+                🛒
+                <span id="cart-count" class="cart-badge">@cartCount</span>
+            </a>
 
             @if (User.IsInRole("Admin"))
             {
@@ -68,7 +88,7 @@
     }
 
     <style>
-        /* Запазваме твоя красив фон и стил */
+        /* 🌸 Навигация */
         .navbar {
             display: flex;
             align-items: center;
@@ -95,43 +115,24 @@
             gap: 1.5rem;
         }
 
-        /* 🌸 Важно: само леко изместваме бутоните вляво */
         .nav-right {
             display: flex;
             align-items: center;
             gap: 1rem;
             position: absolute;
-            right: 9rem; /* преди беше 6rem → само мръднато малко вляво */
+            right: 9rem;
             top: 50%;
             transform: translateY(-50%);
         }
 
-
-        .auth-link {
+        .auth-link, .btn-logout {
             font-weight: 500;
             text-decoration: none;
             color: var(--text-color, #fff);
             transition: opacity 0.2s ease;
         }
 
-            .auth-link:hover {
-                opacity: 0.7;
-            }
-
-        .logout-form {
-            display: inline;
-        }
-
-        .btn-logout {
-            background: none;
-            border: none;
-            color: var(--text-color, #fff);
-            cursor: pointer;
-            font-weight: 500;
-            transition: opacity 0.2s ease;
-        }
-
-            .btn-logout:hover {
+            .auth-link:hover, .btn-logout:hover {
                 opacity: 0.7;
             }
 
@@ -139,7 +140,7 @@
             opacity: 0.8;
             font-size: 0.9rem;
         }
-        /* 🌸 Стил за админ бутона до логото */
+
         .admin-link {
             margin-left: 1rem;
             font-weight: 600;
@@ -158,9 +159,74 @@
                 box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
             }
 
+        .shop-link {
+            margin-left: 1rem;
+            font-size: 1.3rem;
+            text-decoration: none;
+            color: var(--text-color, #fff);
+            transition: transform 0.2s ease, color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+            .shop-link:hover {
+                transform: scale(1.1);
+                color: var(--accent-color, #ff69b4);
+            }
+
+        /* 🛒 Количка */
+        .cart-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.2s ease, color 0.2s ease;
+            width: 36px;
+            height: 36px;
+        }
+
+            .cart-icon:hover {
+                transform: scale(1.08);
+                color: #ff8ecf;
+            }
+
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background-color: #ff69b4;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            padding: 2px 6px;
+            font-weight: 700;
+            min-width: 18px;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 6px rgba(255, 105, 180, 0.5);
+        }
+
+        .cart-badge.animate {
+            animation: bounce 0.4s ease;
+        }
     </style>
 
-
+    <script>
+        // 💖 Малък ефект за подскачане на брояча при зареждане
+        document.addEventListener("DOMContentLoaded", () => {
+            const badge = document.getElementById("cart-count");
+            if (badge) {
+                badge.classList.add("animate");
+                setTimeout(() => badge.classList.remove("animate"), 400);
+            }
+        });
+    </script>
 </body>
 </html>
 

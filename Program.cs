@@ -25,6 +25,14 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
+// 🧺 3.1 Добавяме поддръжка за сесии (за кошницата)
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // колко време да пази сесията
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true; // нужна за GDPR съвместимост
+});
+
 var app = builder.Build();
 
 // 🧩 4. Култури (твоят код, запазен)
@@ -47,16 +55,19 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🧩 5. Добавяме Authentication и Authorization middleware
+// 🧺 5. Активираме сесиите (трябва да е преди Authentication)
+app.UseSession();
+
+// 🧩 6. Добавяме Authentication и Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 🧩 6. Запазваме оригиналната маршрутна логика
+// 🧩 7. Запазваме оригиналната маршрутна логика
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 🧩 7. Създаваме админ роля и потребител при първо стартиране
+// 🧩 8. Създаваме админ роля и потребител при първо стартиране
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
