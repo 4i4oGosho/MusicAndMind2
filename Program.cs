@@ -57,6 +57,16 @@ app.UseRouting();
 
 // 🧺 5. Активираме сесиите (трябва да е преди Authentication)
 app.UseSession();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
+    {
+        context.Response.Redirect("/Auth/Login");
+        return;
+    }
+
+    await next();
+});
 
 // 🧩 6. Добавяме Authentication и Authorization middleware
 app.UseAuthentication();

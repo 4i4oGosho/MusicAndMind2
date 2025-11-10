@@ -24,16 +24,22 @@
                         <p>@item.Price лв.</p>
                         <form asp-action="RemoveFromCart" method="post">
                             <input type="hidden" name="id" value="@item.Id" />
-                            <button type="submit" class="btn-remove">Премахни</button>
+                            <button type="submit" class="btn-remove">❌ Премахни</button>
                         </form>
                     </div>
                 </li>
             }
         </ul>
 
-        <form asp-action="ClearCart" method="post">
-            <button class="btn-clear">🧹 Изчисти кошницата</button>
-        </form>
+        <div class="cart-actions">
+            <form asp-action="ClearCart" method="post">
+                <button class="btn-clear">🧹 Изчисти кошницата</button>
+            </form>
+
+            <form asp-action="Checkout" method="get">
+                <button class="btn-checkout">✅ Завърши поръчката</button>
+            </form>
+        </div>
     }
 </section>
 
@@ -42,6 +48,12 @@
         text-align: center;
         padding: 2rem;
         color: #fff;
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
     }
 
     .cart-list {
@@ -53,32 +65,75 @@
     .cart-item {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         gap: 2rem;
-        margin-bottom: 1rem;
+        margin: 1rem auto;
         background: rgba(255, 255, 255, 0.05);
         border-radius: 12px;
-        padding: 1rem;
+        padding: 1rem 2rem;
+        max-width: 700px;
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.2);
     }
 
         .cart-item img {
             width: 80px;
             height: 80px;
             border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
         }
 
-    .btn-remove, .btn-clear, .btn-back {
+    .cart-info {
+        flex: 1;
+        text-align: left;
+    }
+
+        .cart-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .cart-info p {
+            margin: 0.2rem 0 1rem;
+            font-weight: 500;
+        }
+
+    .btn-remove,
+    .btn-clear,
+    .btn-back,
+    .btn-checkout {
         background: #ff69b4;
         border: none;
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.3rem;
         color: white;
         border-radius: 8px;
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.2s ease;
+        transition: all 0.25s ease;
     }
 
-        .btn-remove:hover, .btn-clear:hover, .btn-back:hover {
+        .btn-remove:hover,
+        .btn-clear:hover,
+        .btn-back:hover,
+        .btn-checkout:hover {
             background: #ff8ac9;
+            transform: scale(1.05);
+        }
+
+    .cart-actions {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+
+    .btn-checkout {
+        background: linear-gradient(90deg, #ff69b4, #ff85c2);
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+    }
+
+        .btn-checkout:hover {
+            background: linear-gradient(90deg, #ff85c2, #ffb6d9);
         }
 </style>

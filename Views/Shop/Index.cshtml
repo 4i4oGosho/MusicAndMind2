@@ -8,13 +8,20 @@
     <h1 class="shop-title">🕉 Магазин на Music & Mind 🕉</h1>
     <p class="shop-subtitle">Инструменти, които хармонизират ума чрез звук и вибрация.</p>
 
+    <div id="cartMessage" class="cart-message" style="display:none;">
+        ✅ Продуктът е добавен в кошницата!
+    </div>
+
     <div class="product-grid">
         @foreach (var item in Model)
         {
             <div class="product-card">
                 <img src="@item.ImageUrl" alt="@item.Name" class="product-image" />
 
-                <h3 class="product-name">@item.Name</h3>
+                <h3 class="product-name">
+                    <a href="/Shop/Details/@item.Id">@item.Name</a>
+                </h3>
+
                 <p class="product-description">@item.Description</p>
                 <p class="product-frequency">🧠 @item.FrequencyInfo</p>
 
@@ -26,22 +33,81 @@
                 <div class="product-footer">
                     <span class="product-price">@item.Price лв.</span>
 
-                    <form action="/Shop/Checkout" method="post" class="product-form">
-                        <input type="hidden" name="productId" value="@item.Id" />
-
-                        <select name="paymentMethod" class="payment-select">
-                            <option value="card">💳 Карта</option>
-                            <option value="cod">🚚 Наложен платеж</option>
-                        </select>
-
-                        <button type="submit" class="btn-buy">Купи</button>
-                    </form>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <button class="btn-buy" onclick="addToCart(@item.Id)">Добави в кошницата</button>
+                    }
+                    else
+                    {
+                        <a href="/Auth/Login" class="btn-login-required">🔒 Влез, за да добавиш</a>
+                    }
                 </div>
-
             </div>
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // 🛍️ Добавяне в кошницата без презареждане
+                        function addToCart(id) {
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest' // 🔥 това помага на сървъра да разбере, че идва от fetch
+                },
+                body: `id=${id}`,
+                credentials: 'include' // 🧠 това праща cookie-то със сесията
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Server error");
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showCartMessage();
+                    updateCartCount();
+                } else {
+                    alert('⚠️ Възникна проблем при добавянето.');
+                }
+            })
+            .catch(() => {
+                alert('⚠️ Грешка при обработката на заявката.');
+            });
+        }
+
+
+
+        // ✅ Показваме малка нотификация
+        function showCartMessage() {
+            const msg = document.getElementById('cartMessage');
+            msg.style.display = 'block';
+            msg.style.opacity = 1;
+            setTimeout(() => {
+                msg.style.opacity = 0;
+                setTimeout(() => msg.style.display = 'none', 400);
+            }, 1000);
+        }
+
+        // 🔢 Обновяване на броя в количката горе
+        function updateCartCount() {
+            fetch('/Cart/Index')
+                .then(r => r.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const count = doc.querySelectorAll('.cart-item').length;
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge) {
+                        badge.textContent = count;
+                        badge.classList.add('animate');
+                        setTimeout(() => badge.classList.remove('animate'), 400);
+                    }
+                });
+        }
+    </script>
+}
 
 <style>
     .shop-container {
@@ -82,22 +148,6 @@
         position: relative;
         overflow: hidden;
     }
-
-        .product-card::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(255,105,180,0.15) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .product-card:hover::before {
-            opacity: 1;
-        }
 
         .product-card:hover {
             transform: translateY(-8px);
@@ -147,24 +197,6 @@
         margin-bottom: 0.5rem;
     }
 
-    .product-form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .payment-select {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: #fff;
-        padding: 0.4rem;
-        border-radius: 0.5rem;
-        width: 80%;
-        text-align: center;
-        cursor: pointer;
-    }
-
     .btn-buy {
         background: #ff69b4;
         border: none;
@@ -180,14 +212,35 @@
             background: #ff85c0;
             transform: scale(1.05);
         }
-    /* 💡 Поправка: позволяваме клик върху бутона */
-    .product-card::before {
-        pointer-events: none;
+
+    /* 🚫 Бутон за гостите */
+    .btn-login-required {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s ease;
     }
 
-    .btn-buy {
-        position: relative;
-        z-index: 10;
-    }
+        .btn-login-required:hover {
+            background: #ff69b4;
+            color: #fff;
+        }
 
+    /* ✅ Нотификация при добавяне */
+    .cart-message {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        background: #ff69b4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+        transition: opacity 0.4s ease;
+        z-index: 1000;
+    }
 </style>

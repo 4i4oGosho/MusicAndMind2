@@ -27,5 +27,6 @@ namespace MusicAndMind2.Models
 
         // 💳 избор на начин на плащане (само за визуализиране)
         public string? PaymentMethod { get; set; } // "Карта" или "Наложен платеж"
+        public string? LongDescription { get; set; }    
     }
 }

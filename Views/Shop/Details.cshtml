@@ -1,0 +1,217 @@
+﻿@model MusicAndMind2.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="product-details-container">
+    <img src="@Model.ImageUrl" alt="@Model.Name" class="product-image" />
+
+    <h2 class="product-title">@Model.Name</h2>
+    <p class="product-price">@Model.Price лв.</p>
+    <p class="product-long-description">@Model.LongDescription</p>
+    <p class="product-frequency">🎵 @Model.FrequencyInfo</p>
+
+    <audio controls class="product-audio">
+        <source src="@Model.SoundUrl" type="audio/mp3" />
+        Вашият браузър не поддържа аудио елемента.
+    </audio>
+
+    <div class="product-actions">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <button type="button" class="btn-buy" onclick="addToCart(@Model.Id)">Добави в кошницата 🛒</button>
+        }
+        else
+        {
+            <a href="/Auth/Login" class="btn-login-required">🔒 Влез, за да добавиш</a>
+        }
+
+        <a href="/Shop" class="btn-back">⬅ Обратно в магазина</a>
+    </div>
+
+    <div id="cartMessage" class="cart-message" style="display:none;">
+        ✅ Продуктът е добавен в кошницата!
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function addToCart(id) {
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `id=${id}`,
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Server error");
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showCartMessage();
+                    updateCartCount();
+                } else {
+                    alert('⚠️ Възникна проблем при добавянето.');
+                }
+            })
+            .catch(() => {
+                alert('⚠️ Грешка при обработката на заявката.');
+            });
+        }
+
+        function showCartMessage() {
+            const msg = document.getElementById('cartMessage');
+            msg.style.display = 'block';
+            msg.style.opacity = 1;
+            setTimeout(() => {
+                msg.style.opacity = 0;
+                setTimeout(() => msg.style.display = 'none', 400);
+            }, 1000);
+        }
+
+        function updateCartCount() {
+            fetch('/Cart/Index')
+                .then(r => r.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const count = doc.querySelectorAll('.cart-item').length;
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge) {
+                        badge.textContent = count;
+                        badge.classList.add('animate');
+                        setTimeout(() => badge.classList.remove('animate'), 400);
+                    }
+                });
+        }
+    </script>
+}
+
+<style>
+    .product-details-container {
+        text-align: center;
+        color: #fff;
+        padding: 3rem 1rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .product-image {
+        width: 300px;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 15px rgba(255,105,180,0.2);
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ff69b4;
+        margin-bottom: 0.8rem;
+    }
+
+    .product-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .product-long-description {
+        max-width: 700px;
+        margin: 0 auto 1.5rem;
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .product-frequency {
+        font-size: 0.9rem;
+        color: #ffb3e0;
+        margin-bottom: 1.5rem;
+    }
+
+    .product-audio {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 2rem;
+    }
+
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .btn-buy,
+    .btn-login-required,
+    .btn-back {
+        display: inline-block;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    /* 🛍️ Активен бутон */
+    .btn-buy {
+        background: #ff69b4;
+        color: #fff;
+        font-weight: 600;
+    }
+
+        .btn-buy:hover {
+            background: #ff85c2;
+            transform: scale(1.05);
+        }
+
+    /* 🔒 Заключен бутон */
+    .btn-login-required {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+
+        .btn-login-required:hover {
+            background: #ff69b4;
+            color: #fff;
+        }
+
+    /* ⬅ Бутон за връщане */
+    .btn-back {
+        background: transparent;
+        color: #ff69b4;
+        border: 2px solid #ff69b4;
+    }
+
+        .btn-back:hover {
+            background: #ff69b4;
+            color: white;
+        }
+
+    /* ✅ Нотификация */
+    .cart-message {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        background: #ff69b4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.4);
+        transition: opacity 0.4s ease;
+        z-index: 1000;
+    }
+</style>
