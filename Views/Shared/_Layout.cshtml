@@ -75,8 +75,35 @@
 
     <main class="container">@RenderBody()</main>
 
+    <!-- 🌙 Нов футър -->
     <footer class="footer">
-        <p>© @DateTime.Now.Year Music & Mind • @L["@이레네🦋"]</p>
+        <div class="footer-container">
+            <div class="footer-section contact-info">
+                <h4>Свържете се с нас</h4>
+                <p>📞 <a href="tel:0896973940">0896 973 940</a></p>
+                <p>✉️ <a href="mailto:contact@musicandmind.bg">contact@musicandmind.bg</a></p>
+            </div>
+
+            <div class="footer-section quick-links">
+                <h4>Навигация</h4>
+                <a href="/Home/About">За нас</a>
+                <a href="/Home/Privacy">Политика за поверителност</a>
+                <a href="/Home/Terms">Условия за ползване</a>
+            </div>
+
+            <div class="footer-section social">
+                <h4>Последвайте ни</h4>
+                <div class="social-icons">
+                    <a href="https://facebook.com" target="_blank" title="Facebook">🌐</a>
+                    <a href="https://instagram.com" target="_blank" title="Instagram">📸</a>
+                    <a href="https://youtube.com" target="_blank" title="YouTube">🎵</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© @DateTime.Now.Year Music & Mind • Създадено с любов и хармония 🌸</p>
+        </div>
     </footer>
 
     <script src="/js/site.js"></script>
@@ -212,13 +239,65 @@
             box-shadow: 0 0 6px rgba(255, 105, 180, 0.5);
         }
 
-        .cart-badge.animate {
-            animation: bounce 0.4s ease;
+        /* 🌑 Футър */
+        .footer {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section h4 {
+            color: #ff69b4;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .footer-section a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            margin: 0.3rem 0;
+            opacity: 0.85;
+            transition: 0.3s ease;
+        }
+
+            .footer-section a:hover {
+                color: #ff85c2;
+                transform: translateX(3px);
+            }
+
+        .social-icons a {
+            display: inline-block;
+            margin: 0 0.5rem;
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+
+            .social-icons a:hover {
+                transform: scale(1.3);
+            }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
     </style>
 
     <script>
-        // 💖 Малък ефект за подскачане на брояча при зареждане
         document.addEventListener("DOMContentLoaded", () => {
             const badge = document.getElementById("cart-count");
             if (badge) {
@@ -227,7 +306,7 @@
             }
         });
     </script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>
-
