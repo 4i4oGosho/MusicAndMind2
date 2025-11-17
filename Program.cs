@@ -5,37 +5,37 @@ using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using MusicAndMind2.Data; // това е за ApplicationDbContext.cs
+using MusicAndMind2.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🧩 1. Добавяме локализацията (твоят съществуващ код)
+// 🧩 Локализация
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// 🧩 2. Добавяме Entity Framework Core и Identity + роли
+// 🧩 Entity Framework Core + Identity + роли (SQL Server LocalDB)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<IdentityRole>() // ✅ Добавяме поддръжка на роли
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 🧩 3. Добавяме MVC с локализация
+// 🧩 MVC + локализация
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// 🧺 3.1 Добавяме поддръжка за сесии (за кошницата)
+// 🧺 Сесии (за кошницата)
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // колко време да пази сесията
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true; // нужна за GDPR съвместимост
+    options.Cookie.IsEssential = true;
 });
 
 var app = builder.Build();
 
-// 🧩 4. Култури (твоят код, запазен)
+// 🧩 Култури
 var supportedCultures = new[] { new CultureInfo("bg"), new CultureInfo("en") };
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
@@ -44,6 +44,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
+// 🧩 Стандартни middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,8 +56,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🧺 5. Активираме сесиите (трябва да е преди Authentication)
 app.UseSession();
+
+// ❗ Пренасочване на Identity Login към твоето Auth/Login
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
@@ -68,28 +70,24 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// 🧩 6. Добавяме Authentication и Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 🧩 7. Запазваме оригиналната маршрутна логика
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 🧩 8. Създаваме админ роля и потребител при първо стартиране
+// 🧩 Автоматично създаване на роля Admin и админ акаунт
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-    // Създаваме роля Admin, ако не съществува
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
 
-    // Проверяваме дали има админ акаунт
     string adminEmail = "admin@musicmind.com";
     string adminPass = "Admin123!";
 
