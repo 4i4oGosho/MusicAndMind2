@@ -19,7 +19,7 @@ namespace MusicAndMind2.Controllers
             _userManager = userManager;
         }
 
-        // 🧩 дефиниции на честотите – тук са ключовете, имената и пътищата
+        // 🧠 Дефиниции на всички аудио честоти
         private static readonly List<FocusTrackDefinition> Tracks = new()
         {
             new("alpha", "Alpha Flow (10 Hz AM)",
@@ -47,11 +47,10 @@ namespace MusicAndMind2.Controllers
                 "Просветление", "/images/wave-963.jpg", "/audio/963hz.mp3")
         };
 
-        // 🔐 помощ: взимаме дефиниция по ключ
         private FocusTrackDefinition? GetTrack(string key) =>
             Tracks.FirstOrDefault(t => t.Key == key);
 
-        // 💾 Запазване на честота в профила
+        // 💾 Запазване на честота
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(string trackKey)
@@ -72,6 +71,7 @@ namespace MusicAndMind2.Controllers
                     UserId = userId,
                     TrackKey = trackKey
                 });
+
                 await _db.SaveChangesAsync();
             }
 
@@ -79,7 +79,28 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction("Focus", "Home");
         }
 
-        // 📂 Страница "Моите честоти"
+        // ❌ Премахване на честота
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Remove(string trackKey)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var entity = await _db.UserFocusTracks
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.TrackKey == trackKey);
+
+            if (entity != null)
+            {
+                _db.UserFocusTracks.Remove(entity);
+                await _db.SaveChangesAsync();
+            }
+
+            TempData["FocusMessage"] = "Честотата беше премахната от запазените.";
+            return RedirectToAction(nameof(MyTracks));
+        }
+
+        // 📂 „Моите честоти“
         [HttpGet]
         public async Task<IActionResult> MyTracks()
         {
@@ -91,7 +112,7 @@ namespace MusicAndMind2.Controllers
                 .ToListAsync();
 
             var model = userTracks
-                .Select(ut => GetTrack(ut.TrackKey))
+                .Select(t => GetTrack(t.TrackKey))
                 .Where(t => t != null)!
                 .ToList();
 
@@ -99,7 +120,7 @@ namespace MusicAndMind2.Controllers
         }
     }
 
-    // Малък helper клас за дефиниция на честота
+    // 🎵 Дефиниция на честота
     public class FocusTrackDefinition
     {
         public FocusTrackDefinition(string key, string title, string description,
