@@ -9,7 +9,11 @@
 
     // 🧮 Взимаме броя на продуктите от сесията
     int cartCount = 0;
-    var cartJson = Context.Session.GetString("CartItems");
+    string sessionKey = User.Identity.IsAuthenticated
+    ? $"CartItems_{UserManager.GetUserName(User)}"
+    : "CartItems_Guest";
+
+    var cartJson = Context.Session.GetString(sessionKey);
     if (!string.IsNullOrEmpty(cartJson))
     {
         var cartList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Product>>(cartJson);
@@ -54,12 +58,16 @@
                 <a href="/Home/Science">@L["Наука"]</a>
                 <a href="/Home/About">@L["За нас"]</a>
                 <a href="/Home/Contact">@L["Контакти"]</a>
+
+                
             </nav>
+
         </div>
 
         <div class="nav-right">
             @if (SignInManager.IsSignedIn(User))
             {
+                <a href="/Focus/MyTracks" class="auth-link">🎵 Моите честоти</a>
                 <span class="user-info">👤 @UserManager.GetUserName(User)</span>
                 <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
                     <button type="submit" class="btn-logout">@L["Изход"]</button>

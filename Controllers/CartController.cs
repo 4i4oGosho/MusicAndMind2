@@ -8,9 +8,13 @@ namespace MusicAndMind2.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private const string CartSessionKey = "CartItems";
+        // 🔐 ВАЖНО: Отделна кошница за всеки потребител
+        private string CartSessionKey =>
+            User.Identity!.IsAuthenticated
+                ? $"CartItems_{User.Identity.Name}"   // За логнат потребител
+                : "CartItems_Guest";                  // За гост
 
-        // 🧠 Взимаме текущата кошница от сесията
+        // 🧠 Взимане на кошница
         private List<Product> GetCart()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
@@ -19,17 +23,16 @@ namespace MusicAndMind2.Controllers
                 : new List<Product>();
         }
 
-        // 💾 Запазваме кошницата обратно в сесията
+        // 💾 Запазване на кошницата
         private void SaveCart(List<Product> cart)
         {
             HttpContext.Session.SetString(CartSessionKey, JsonConvert.SerializeObject(cart));
         }
 
-        // 🛍️ Добавяне на продукт в кошницата
+        // ➕ Добавяне на продукт
         [HttpPost]
-        [IgnoreAntiforgeryToken] // ⬅️ добави този ред
+        [IgnoreAntiforgeryToken]
         public IActionResult AddToCart(int id)
-
         {
             var product = ShopController.Products.FirstOrDefault(p => p.Id == id);
             if (product == null)
@@ -39,24 +42,14 @@ namespace MusicAndMind2.Controllers
             cart.Add(product);
             SaveCart(cart);
 
-            TempData["CartCount"] = cart.Count;
-
-            // ⚡ Ако заявката идва чрез fetch (AJAX), връщаме JSON вместо redirect
+            // AJAX добавяне
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
                 return Json(new { success = true, count = cart.Count });
-            }
 
-            // ⚡ Ако идва от страницата с детайли — връщаме обратно към продукта
-            var referer = Request.Headers["Referer"].ToString();
-            if (!string.IsNullOrEmpty(referer) && referer.Contains("/Shop/Details"))
-                return Redirect(referer);
-
-            // В противен случай — към кошницата
             return RedirectToAction("Index");
         }
 
-        // 🧺 Преглед на кошницата
+        // 🛒 Преглед на кошницата
         public IActionResult Index()
         {
             var cart = GetCart();
@@ -64,7 +57,7 @@ namespace MusicAndMind2.Controllers
             return View(cart);
         }
 
-        // ❌ Премахване на продукт от кошницата
+        // ❌ Премахване
         [HttpPost]
         public IActionResult RemoveFromCart(int id)
         {
@@ -75,47 +68,43 @@ namespace MusicAndMind2.Controllers
                 cart.Remove(item);
                 SaveCart(cart);
             }
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
-        // 🧹 Изчистване на кошницата
+        // 🧹 Изчистване
         [HttpPost]
         public IActionResult ClearCart()
         {
             SaveCart(new List<Product>());
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
-        // 🧾 Страница за завършване на поръчката
-        [HttpGet]
+        // 🧾 Checkout
         public IActionResult Checkout()
         {
             var cart = GetCart();
-            if (!cart.Any())
-                return RedirectToAction("Index");
+            if (!cart.Any()) return RedirectToAction("Index");
 
             ViewBag.Cart = cart;
             return View();
         }
 
-        // ✅ Потвърждение на поръчката
         [HttpPost]
         public IActionResult Checkout(string name, string address, string city, string phone, string paymentMethod)
         {
             var cart = GetCart();
-            if (!cart.Any())
-                return RedirectToAction("Index");
+            if (!cart.Any()) return RedirectToAction("Index");
 
-            SaveCart(new List<Product>()); // Изчистваме кошницата
+            // 🗑 Изчистваме кошницата след поръчка
+            SaveCart(new List<Product>());
 
             TempData["OrderName"] = name;
             TempData["OrderPayment"] = paymentMethod == "card" ? "Карта 💳" : "Наложен платеж 🚚";
 
-            return RedirectToAction("OrderSuccess");
+            return RedirectToAction(nameof(OrderSuccess));
         }
 
-        // 🎉 Страница за успех
-        [HttpGet]
+        // 🎉 Успешна поръчка
         public IActionResult OrderSuccess()
         {
             ViewBag.Name = TempData["OrderName"];

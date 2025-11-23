@@ -59,7 +59,12 @@ namespace MusicAndMind2.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+
+            // 🛒 Изчистваме кошницата при лог-аут
+            HttpContext.Session.Remove("CartItems");
+
             return RedirectToAction("Index", "Home");
         }
+
     }
 }

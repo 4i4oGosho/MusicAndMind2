@@ -1,3 +1,8 @@
+@using MusicAndMind2.Controllers   @* за FocusTrackDefinition ако го ползваш тук в бъдеще *@
+@{
+    ViewData["Title"] = "Фокус";
+}
+
 <section class="prose focus fade-in">
     <h1>Фокус и продуктивност</h1>
     <p class="fade-step">
@@ -39,6 +44,13 @@
         без допълнителен стрес или напрежение.
     </p>
 
+    @if (TempData["FocusMessage"] != null)
+    {
+        <div class="alert-soft">
+            @TempData["FocusMessage"]
+        </div>
+    }
+
     <div class="grid fade-step">
         @* Alpha *@
         <article class="card fade-step">
@@ -51,6 +63,20 @@
                     <input class="vol" type="range" min="0" max="1" step="0.01" value="0.3" />
                     <span class="tag">Спокоен</span>
                 </div>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                        <input type="hidden" name="trackKey" value="alpha" />
+                        <button type="submit" class="btn-fancy small">Запази в профила</button>
+                        <a href="/audio/alpha_am_200_10.wav" download class="btn-ghost small">Изтегли</a>
+                    </form>
+                }
+                else
+                {
+                    <p class="hint">🔒 Влез, за да запазиш честотата и да я намираш по-късно.</p>
+                    <a href="/Auth/Login" class="btn-fancy small">Вход</a>
+                }
             </div>
         </article>
 
@@ -65,6 +91,15 @@
                     <input class="vol" type="range" min="0" max="1" step="0.01" value="0.25" />
                     <span class="tag">Deep Work</span>
                 </div>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                        <input type="hidden" name="trackKey" value="gamma" />
+                        <button type="submit" class="btn-fancy small">Запази в профила</button>
+                        <a href="/audio/gamma_am_400_40.wav" download class="btn-ghost small">Изтегли</a>
+                    </form>
+                }
             </div>
         </article>
 
@@ -79,6 +114,15 @@
                     <input class="vol" type="range" min="0" max="1" step="0.01" value="0.2" />
                     <span class="tag">Баланс</span>
                 </div>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                        <input type="hidden" name="trackKey" value="hz528" />
+                        <button type="submit" class="btn-fancy small">Запази в профила</button>
+                        <a href="/audio/528hz.wav" download class="btn-ghost small">Изтегли</a>
+                    </form>
+                }
             </div>
         </article>
 
@@ -93,9 +137,19 @@
                     <input class="vol" type="range" min="0" max="1" step="0.01" value="0.2" />
                     <span class="tag">Хармония</span>
                 </div>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                        <input type="hidden" name="trackKey" value="hz432" />
+                        <button type="submit" class="btn-fancy small">Запази в профила</button>
+                        <a href="/audio/432hz.wav" download class="btn-ghost small">Изтегли</a>
+                    </form>
+                }
             </div>
         </article>
     </div>
+
     @* 852 Hz *@
     <article class="card fade-step">
         <div class="thumb"><img src="/images/wave-852hz.jpg" alt="852 Hz"></div>
@@ -107,6 +161,15 @@
                 <input class="vol" type="range" min="0" max="1" step="0.01" value="0.25" />
                 <span class="tag">Интуиция</span>
             </div>
+
+            @if (User.Identity!.IsAuthenticated)
+            {
+                <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                    <input type="hidden" name="trackKey" value="hz852" />
+                    <button type="submit" class="btn-fancy small">Запази в профила</button>
+                    <a href="/audio/852hz.mp3" download class="btn-ghost small">Изтегли</a>
+                </form>
+            }
         </div>
     </article>
 
@@ -121,9 +184,17 @@
                 <input class="vol" type="range" min="0" max="1" step="0.01" value="0.25" />
                 <span class="tag">Просветление</span>
             </div>
+
+            @if (User.Identity!.IsAuthenticated)
+            {
+                <form asp-controller="Focus" asp-action="Save" method="post" class="focus-actions">
+                    <input type="hidden" name="trackKey" value="hz963" />
+                    <button type="submit" class="btn-fancy small">Запази в профила</button>
+                    <a href="/audio/963hz.mp3" download class="btn-ghost small">Изтегли</a>
+                </form>
+            }
         </div>
     </article>
-
 
     <h2>Енергията следва вниманието</h2>
     <p class="fade-step">
@@ -134,5 +205,34 @@
         <img src="/images/energy-focus.png" alt="Концентрация и фокус" />
         <figcaption>Стресът пада. Концентрацията расте.</figcaption>
     </figure>
-
 </section>
+
+<style>
+    .focus-actions {
+        margin-top: 0.8rem;
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-fancy.small,
+    .btn-ghost.small {
+        padding: 0.35rem 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .alert-soft {
+        margin: 1rem 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: rgba(255, 105, 180, 0.12);
+        border: 1px solid rgba(255, 105, 180, 0.4);
+        font-size: 0.9rem;
+    }
+
+    .hint {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+    }
+</style>

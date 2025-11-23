@@ -1,0 +1,43 @@
+﻿@model List<MusicAndMind2.Controllers.FocusTrackDefinition>
+
+@{
+    ViewData["Title"] = "Моите честоти";
+}
+
+<section class="prose focus fade-in">
+    <h1>Моите запазени честоти</h1>
+    <p class="fade-step">
+        Тук виждаш всички звукови пътеки, които си запазил в профила си.
+    </p>
+
+    @if (!Model.Any())
+    {
+        <p>Все още нямаш запазени честоти. 🤍</p>
+        <a href="/Home/Focus" class="btn-fancy">Към фокус пътеките</a>
+    }
+    else
+    {
+        <div class="grid fade-step">
+            @foreach (var track in Model)
+            {
+                <article class="card fade-step">
+                    <div class="thumb">
+                        <img src="@track.ImageUrl" alt="@track.Title" />
+                    </div>
+                    <div class="card-body">
+                        <h3>@track.Title</h3>
+                        <p>@track.Description</p>
+                        <div class="controls">
+                            <button class="btn play" data-src="@track.AudioUrl">▶</button>
+                            <input class="vol" type="range" min="0" max="1" step="0.01" value="0.25" />
+                            <span class="tag">@track.Tag</span>
+                        </div>
+                        <a href="@track.AudioUrl" download class="btn-ghost small" style="margin-top:0.6rem;">
+                            Изтегли
+                        </a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
