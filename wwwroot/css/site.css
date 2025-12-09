@@ -1058,4 +1058,64 @@ body.theme-light .scroll-indicator {
     .theme-light .btn-logout:hover {
         color: #ff69b4; /* розов при задържане */
     }
+/* ===== Admin панел – обща рамка ===== */
+.admin-panel {
+    max-width: 900px;
+    margin-inline: auto;
+}
+
+/* Заглавия */
+.admin-title {
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.admin-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+/* Карта */
+.admin-card {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px);
+}
+
+/* Полета във формата */
+.admin-input {
+    border-radius: 16px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.95rem;
+}
+
+/* Етикети */
+.admin-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Бутоните – адаптивни към темата */
+.admin-btn-primary {
+    border-radius: 999px;
+    padding: 0.5rem 1.6rem;
+    font-weight: 600;
+}
+
+/* outline */
+.admin-btn-outline {
+    border-radius: 999px;
+    padding: 0.5rem 1.4rem;
+}
+
+/* ===== Теми (примерни селектори) ===== */
+/* ако имаш клас на body за тъмна тема – смени .dark-theme/.light-theme
+   да съвпадат с твоите */
+body.dark-theme .admin-card {
+    background: rgba(5, 5, 10, 0.88);
+    color: #f8f8ff;
+}
+
+body.dark-theme .admin-input {
+    background: rgba(15, 15, 25, 0.
 

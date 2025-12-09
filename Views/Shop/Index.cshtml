@@ -31,7 +31,7 @@
                 </audio>
 
                 <div class="product-footer">
-                    <span class="product-price">@item.Price лв.</span>
+                    <span class="product-price">@item.Price.ToString("F2") €</span>
 
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -50,34 +50,37 @@
 @section Scripts {
     <script>
         // 🛍️ Добавяне в кошницата без презареждане
-                        function addToCart(id) {
+        function addToCart(id) {
             fetch('/Cart/AddToCart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest' // 🔥 това помага на сървъра да разбере, че идва от fetch
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: `id=${id}`,
-                credentials: 'include' // 🧠 това праща cookie-то със сесията
+                body: `id=${encodeURIComponent(id)}`,
+                credentials: 'include'
             })
-            .then(response => {
-                if (!response.ok) throw new Error("Server error");
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     showCartMessage();
-                    updateCartCount();
+
+                    // 🔢 обновяваме значката на количката с броя артикули
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge && typeof data.count === 'number') {
+                        badge.textContent = data.count;
+                        badge.classList.add('animate');
+                        setTimeout(() => badge.classList.remove('animate'), 400);
+                    }
                 } else {
-                    alert('⚠️ Възникна проблем при добавянето.');
+                    alert('⚠️ Възникна проблем при добавянето в кошницата.');
                 }
             })
-            .catch(() => {
+            .catch(err => {
+                console.error(err);
                 alert('⚠️ Грешка при обработката на заявката.');
             });
         }
-
-
 
         // ✅ Показваме малка нотификация
         function showCartMessage() {
@@ -88,23 +91,6 @@
                 msg.style.opacity = 0;
                 setTimeout(() => msg.style.display = 'none', 400);
             }, 1000);
-        }
-
-        // 🔢 Обновяване на броя в количката горе
-        function updateCartCount() {
-            fetch('/Cart/Index')
-                .then(r => r.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const count = doc.querySelectorAll('.cart-item').length;
-                    const badge = document.querySelector('.cart-badge');
-                    if (badge) {
-                        badge.textContent = count;
-                        badge.classList.add('animate');
-                        setTimeout(() => badge.classList.remove('animate'), 400);
-                    }
-                });
         }
     </script>
 }

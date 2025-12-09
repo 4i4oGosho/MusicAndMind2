@@ -1,35 +1,51 @@
 ﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
 
 @{
-    ViewData["Title"] = "Потребители";
+    ViewData["Title"] = "Всички регистрирани акаунти";
 }
 
-<h2 style="text-align:center; margin-top:2rem;">Всички регистрирани акаунти</h2>
+<div class="checkout-container">
+    <h2>Всички регистрирани акаунти</h2>
+    <p>Списък с потребителите в системата. Можеш да изтриеш акаунт при нужда.</p>
 
-<table style="margin:auto; margin-top:2rem; border-collapse:collapse; width:80%; color:white;">
-    <thead style="background-color:rgba(255,255,255,0.1);">
-        <tr>
-            <th style="padding:0.8rem;">Имейл</th>
-            <th style="padding:0.8rem;">Потвърден</th>
-            <th style="padding:0.8rem;">Id</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                <td style="padding:0.8rem;">@user.Email</td>
-                <td style="padding:0.8rem;">@(user.EmailConfirmed ? "✅" : "❌")</td>
-                <td style="padding:0.8rem;">@user.Id</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<style>
-    table {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(255,255,255,0.1);
-    }
-</style>
+    <div class="cart-summary" style="max-width: 720px;">
+        <table style="width:100%; border-collapse:collapse; color:#fff;">
+            <thead>
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <th style="padding:0.6rem; text-align:left;">Имейл</th>
+                    <th style="padding:0.6rem; text-align:left;">Потвърден</th>
+                    <th style="padding:0.6rem; text-align:left;">Id</th>
+                    <th style="padding:0.6rem; text-align:right;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:0.5rem;">@user.Email</td>
+                        <td style="padding:0.5rem;">
+                            @{
+                                // ако имаш EmailConfirmed claim в Identity – може да го показваш отделно
+                                // тук просто слагаме "—" понеже IdentityUser по дефолт няма това свойство
+                            }
+                            —
+                        </td>
+                        <td style="padding:0.5rem; font-size:0.8rem; opacity:0.8;">@user.Id</td>
+                        <td style="padding:0.5rem; text-align:right;">
+                            <form asp-action="DeleteUser" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Наистина ли искаш да изтриеш този акаунт?');">
+                                <input type="hidden" name="id" value="@user.Id" />
+                                <button type="submit"
+                                        style="background:#ff4b6e; border:none; padding:0.35rem 0.9rem;
+                                               border-radius:999px; font-size:0.8rem; font-weight:600;
+                                               cursor:pointer;">
+                                    Изтрий
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

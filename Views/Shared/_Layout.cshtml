@@ -7,19 +7,22 @@
 @{
     var L = Factory.Create("SharedResource", "MusicAndMind2");
 
-    // 🧮 Взимаме броя на продуктите от сесията
+    // 🧮 Взимаме броя на продуктите от СЕСИЯТА (както в CartController)
     int cartCount = 0;
     string sessionKey = User.Identity.IsAuthenticated
-    ? $"CartItems_{UserManager.GetUserName(User)}"
-    : "CartItems_Guest";
+        ? $"CartItems_{UserManager.GetUserName(User)}"
+        : "CartItems_Guest";
 
     var cartJson = Context.Session.GetString(sessionKey);
     if (!string.IsNullOrEmpty(cartJson))
     {
-        var cartList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Product>>(cartJson);
+        var cartList = Newtonsoft.Json.JsonConvert
+            .DeserializeObject<List<MusicAndMind2.Models.Product>>(cartJson);
+
         cartCount = cartList?.Count ?? 0;
     }
 }
+
 
 <!DOCTYPE html>
 <html lang="bg">
@@ -49,7 +52,13 @@
 
             @if (User.IsInRole("Admin"))
             {
-                <a href="/Admin" class="admin-link">Админ</a>
+                <div class="admin-dropdown">
+                    <button type="button" class="admin-link">Админ ▾</button>
+                    <div class="admin-menu">
+                        <a href="/Admin/ProductList">🛒 Управление на продукти</a>
+                        <a href="/Admin">👥 Регистрирани акаунти</a>
+                    </div>
+                </div>
             }
 
             <nav class="menu">
@@ -58,10 +67,7 @@
                 <a href="/Home/Science">@L["Наука"]</a>
                 <a href="/Home/About">@L["За нас"]</a>
                 <a href="/Home/Contact">@L["Контакти"]</a>
-
-                
             </nav>
-
         </div>
 
         <div class="nav-right">
@@ -186,6 +192,8 @@
             border-radius: 10px;
             transition: all 0.25s ease;
             box-shadow: 0 0 10px rgba(255,255,255,0.05);
+            border: none;
+            cursor: pointer;
         }
 
             .admin-link:hover {
@@ -245,6 +253,45 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 6px rgba(255, 105, 180, 0.5);
+        }
+
+        /* 🔽 Admin dropdown */
+        .admin-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .admin-menu {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 0;
+            background: rgba(0,0,0,0.7);
+            padding: 0.7rem 0;
+            border-radius: 10px;
+            min-width: 220px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            z-index: 999;
+            backdrop-filter: blur(6px);
+        }
+
+            .admin-menu a {
+                display: block;
+                padding: 0.6rem 1rem;
+                color: #fff;
+                text-decoration: none;
+                font-size: 0.9rem;
+                transition: background 0.2s ease, color 0.2s ease;
+            }
+
+                .admin-menu a:hover {
+                    background: rgba(255, 105, 180, 0.25);
+                    color: #ffb8dd;
+                }
+
+        /* показваме менюто когато контейнерът има клас open */
+        .admin-dropdown.open .admin-menu {
+            display: block;
         }
 
         /* 🌑 Футър */
@@ -311,6 +358,24 @@
             if (badge) {
                 badge.classList.add("animate");
                 setTimeout(() => badge.classList.remove("animate"), 400);
+            }
+
+            // 🔽 Админ dropdown на клик
+            const adminDropdown = document.querySelector('.admin-dropdown');
+            const adminButton = adminDropdown?.querySelector('.admin-link');
+
+            if (adminDropdown && adminButton) {
+                adminButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // да не затвори веднага
+                    adminDropdown.classList.toggle('open');
+                });
+
+                // скриване при клик извън менюто
+                document.addEventListener('click', (e) => {
+                    if (!adminDropdown.contains(e.target)) {
+                        adminDropdown.classList.remove('open');
+                    }
+                });
             }
         });
     </script>

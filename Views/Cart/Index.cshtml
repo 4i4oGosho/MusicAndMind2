@@ -21,7 +21,7 @@
                     <img src="@item.ImageUrl" alt="@item.Name" />
                     <div class="cart-info">
                         <h3>@item.Name</h3>
-                        <p>@item.Price лв.</p>
+                        <p>@item.Price.ToString("0.00") €</p>
                         <form asp-action="RemoveFromCart" method="post">
                             <input type="hidden" name="id" value="@item.Id" />
                             <button type="submit" class="btn-remove">❌ Премахни</button>

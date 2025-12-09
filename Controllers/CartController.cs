@@ -2,17 +2,28 @@
 using Microsoft.AspNetCore.Mvc;
 using MusicAndMind2.Models;
 using Newtonsoft.Json;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace MusicAndMind2.Controllers
 {
     [Authorize]
     public class CartController : Controller
     {
-        // 🔐 ВАЖНО: Отделна кошница за всеки потребител
+        private readonly IConfiguration _config;
+
+        public CartController(IConfiguration config)
+        {
+            _config = config;
+        }
+
+        // 🔐 Отделна кошница за всеки потребител (в сесията)
         private string CartSessionKey =>
             User.Identity!.IsAuthenticated
-                ? $"CartItems_{User.Identity.Name}"   // За логнат потребител
-                : "CartItems_Guest";                  // За гост
+                ? $"CartItems_{User.Identity.Name}"
+                : "CartItems_Guest";
 
         // 🧠 Взимане на кошница
         private List<Product> GetCart()
@@ -29,7 +40,7 @@ namespace MusicAndMind2.Controllers
             HttpContext.Session.SetString(CartSessionKey, JsonConvert.SerializeObject(cart));
         }
 
-        // ➕ Добавяне на продукт
+        // ➕ Добавяне на продукт (старият работещ вариант)
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult AddToCart(int id)
@@ -79,27 +90,93 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // 🧾 Checkout
+        // 🧾 Checkout (страницата с формата)
         public IActionResult Checkout()
         {
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
 
             ViewBag.Cart = cart;
+            ViewBag.Total = cart.Sum(p => p.Price);
             return View();
         }
 
+        // ✅ Потвърждаване на поръчката + изпращане на e-mail
         [HttpPost]
-        public IActionResult Checkout(string name, string address, string city, string phone, string paymentMethod)
+        public IActionResult Checkout(string name, string address, string city, string phone)
         {
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
+
+            // e-mail на логнатия потребител (при теб username = e-mail)
+            string toEmail = User.Identity?.Name ?? "unknown@local";
+            var total = cart.Sum(p => p.Price);
+
+            // 📝 Текст на съобщението
+            var sb = new StringBuilder();
+            sb.AppendLine($"Здравей, {name}!");
+            sb.AppendLine();
+            sb.AppendLine("Благодарим ти за поръчката в Music & Mind.");
+            sb.AppendLine();
+            sb.AppendLine("Детайли за поръчката:");
+
+            foreach (var p in cart)
+            {
+                sb.AppendLine($" • {p.Name} - {p.Price:0.00} €");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($"Обща сума: {total:0.00} €");
+            sb.AppendLine();
+            sb.AppendLine("Данни за доставка:");
+            sb.AppendLine($"Име: {name}");
+            sb.AppendLine($"Град: {city}");
+            sb.AppendLine($"Адрес: {address}");
+            sb.AppendLine($"Телефон: {phone}");
+            sb.AppendLine();
+            sb.AppendLine("Начин на плащане: Наложен платеж при доставка.");
+            sb.AppendLine("Очакван срок за доставка: 3–5 работни дни.");
+            sb.AppendLine();
+            sb.AppendLine("С хармония,");
+            sb.AppendLine("Music & Mind");
+
+            // 📧 Изпращане на e-mail
+            try
+            {
+                // четем настройките от appsettings.json -> "SMTP": { ... }
+                var host = _config["SMTP:Host"];
+                int port = int.TryParse(_config["SMTP:Port"], out var parsedPort) ? parsedPort : 587;
+                bool enableSsl = bool.TryParse(_config["SMTP:EnableSSL"], out var parsedSsl) ? parsedSsl : true;
+                var user = _config["SMTP:User"];
+                var pass = _config["SMTP:Password"];
+                var from = _config["SMTP:From"] ?? user;
+                var fromName = _config["SMTP:FromName"] ?? "Music & Mind";
+
+                var message = new MailMessage();
+                message.From = new MailAddress(from, fromName);
+                message.To.Add(toEmail);
+                message.Subject = "Потвърждение на поръчка";
+                message.Body = sb.ToString();
+                message.IsBodyHtml = false;
+
+                using (var smtp = new SmtpClient(host, port))
+                {
+                    smtp.EnableSsl = enableSsl;
+                    smtp.Credentials = new NetworkCredential(user, pass);
+                    smtp.Send(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                // ❗ Записваме грешката, за да я видиш в OrderSuccess
+                TempData["MailError"] = ex.ToString();
+            }
 
             // 🗑 Изчистваме кошницата след поръчка
             SaveCart(new List<Product>());
 
             TempData["OrderName"] = name;
-            TempData["OrderPayment"] = paymentMethod == "card" ? "Карта 💳" : "Наложен платеж 🚚";
+            TempData["OrderPayment"] = "Наложен платеж 🚚";
 
             return RedirectToAction(nameof(OrderSuccess));
         }
@@ -109,6 +186,7 @@ namespace MusicAndMind2.Controllers
         {
             ViewBag.Name = TempData["OrderName"];
             ViewBag.Payment = TempData["OrderPayment"];
+            ViewBag.MailError = TempData["MailError"]; // добавяме грешката, ако има
             return View();
         }
     }
