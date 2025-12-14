@@ -12,16 +12,13 @@ namespace MusicAndMind2.Data
         {
         }
 
-        // 🛒 Продукти в магазина
         public DbSet<Product> Products { get; set; } = null!;
-
-        // 🛒 Елементи в количката
         public DbSet<CartItem> CartItems { get; set; } = null!;
-
-        // 🎵 Дефинирани честоти (ако имаш FrequencyTrack.cs)
         public DbSet<FrequencyTrack> FrequencyTracks { get; set; } = null!;
-
-        // 👤 Запазени честоти от потребителя
         public DbSet<UserFocusTrack> UserFocusTracks { get; set; } = null!;
+
+        // ✅ Поръчки
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
     }
 }

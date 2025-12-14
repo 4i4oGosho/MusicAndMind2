@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using MusicAndMind2.Data;
 
 namespace MusicAndMind2.Controllers
 {
@@ -13,137 +14,204 @@ namespace MusicAndMind2.Controllers
     public class CartController : Controller
     {
         private readonly IConfiguration _config;
+        private readonly ApplicationDbContext _db;
 
-        public CartController(IConfiguration config)
+        public CartController(IConfiguration config, ApplicationDbContext db)
         {
             _config = config;
+            _db = db;
         }
 
-        // 🔐 Отделна кошница за всеки потребител (в сесията)
         private string CartSessionKey =>
             User.Identity!.IsAuthenticated
                 ? $"CartItems_{User.Identity.Name}"
                 : "CartItems_Guest";
 
-        // 🧠 Взимане на кошница
-        private List<Product> GetCart()
+        private List<CartSessionItem> GetCart()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
             return cartJson != null
-                ? JsonConvert.DeserializeObject<List<Product>>(cartJson) ?? new List<Product>()
-                : new List<Product>();
+                ? JsonConvert.DeserializeObject<List<CartSessionItem>>(cartJson) ?? new List<CartSessionItem>()
+                : new List<CartSessionItem>();
         }
 
-        // 💾 Запазване на кошницата
-        private void SaveCart(List<Product> cart)
+        private void SaveCart(List<CartSessionItem> cart)
         {
             HttpContext.Session.SetString(CartSessionKey, JsonConvert.SerializeObject(cart));
         }
 
-        // ➕ Добавяне на продукт (старият работещ вариант)
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult AddToCart(int id)
         {
             var product = ShopController.Products.FirstOrDefault(p => p.Id == id);
-            if (product == null)
-                return NotFound();
+            if (product == null) return NotFound();
 
             var cart = GetCart();
-            cart.Add(product);
+            var existing = cart.FirstOrDefault(x => x.Product.Id == id);
+
+            if (existing != null) existing.Quantity++;
+            else cart.Add(new CartSessionItem { Product = product, Quantity = 1 });
+
             SaveCart(cart);
 
-            // AJAX добавяне
+            var totalCount = cart.Sum(x => x.Quantity);
+
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return Json(new { success = true, count = cart.Count });
+                return Json(new { success = true, count = totalCount });
 
             return RedirectToAction("Index");
         }
 
-        // 🛒 Преглед на кошницата
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult AddToCartQty(int id, int qty)
+        {
+            if (qty < 1) qty = 1;
+
+            var product = ShopController.Products.FirstOrDefault(p => p.Id == id);
+            if (product == null) return NotFound();
+
+            var cart = GetCart();
+            var existing = cart.FirstOrDefault(x => x.Product.Id == id);
+
+            if (existing != null) existing.Quantity += qty;
+            else cart.Add(new CartSessionItem { Product = product, Quantity = qty });
+
+            SaveCart(cart);
+
+            var totalCount = cart.Sum(x => x.Quantity);
+
+            return Json(new { success = true, count = totalCount });
+        }
+
         public IActionResult Index()
         {
             var cart = GetCart();
-            ViewBag.CartCount = cart.Count;
+            ViewBag.CartCount = cart.Sum(x => x.Quantity);
             return View(cart);
         }
 
-        // ❌ Премахване
         [HttpPost]
         public IActionResult RemoveFromCart(int id)
         {
             var cart = GetCart();
-            var item = cart.FirstOrDefault(p => p.Id == id);
+            var item = cart.FirstOrDefault(x => x.Product.Id == id);
             if (item != null)
             {
                 cart.Remove(item);
                 SaveCart(cart);
             }
+
             return RedirectToAction(nameof(Index));
         }
 
-        // 🧹 Изчистване
         [HttpPost]
         public IActionResult ClearCart()
         {
-            SaveCart(new List<Product>());
+            SaveCart(new List<CartSessionItem>());
             return RedirectToAction(nameof(Index));
         }
 
-        // 🧾 Checkout (страницата с формата)
         public IActionResult Checkout()
         {
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
 
             ViewBag.Cart = cart;
-            ViewBag.Total = cart.Sum(p => p.Price);
+            ViewBag.Total = cart.Sum(i => i.Product.Price * i.Quantity);
             return View();
         }
 
-        // ✅ Потвърждаване на поръчката + изпращане на e-mail
         [HttpPost]
         public IActionResult Checkout(string name, string address, string city, string phone)
         {
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
 
-            // e-mail на логнатия потребител (при теб username = e-mail)
-            string toEmail = User.Identity?.Name ?? "unknown@local";
-            var total = cart.Sum(p => p.Price);
+            var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            var customerEmail = User.Identity?.Name ?? "unknown@local";
+            var total = cart.Sum(i => i.Product.Price * i.Quantity);
 
-            // 📝 Текст на съобщението
-            var sb = new StringBuilder();
-            sb.AppendLine($"Здравей, {name}!");
-            sb.AppendLine();
-            sb.AppendLine("Благодарим ти за поръчката в Music & Mind.");
-            sb.AppendLine();
-            sb.AppendLine("Детайли за поръчката:");
-
-            foreach (var p in cart)
-            {
-                sb.AppendLine($" • {p.Name} - {p.Price:0.00} €");
-            }
-
-            sb.AppendLine();
-            sb.AppendLine($"Обща сума: {total:0.00} €");
-            sb.AppendLine();
-            sb.AppendLine("Данни за доставка:");
-            sb.AppendLine($"Име: {name}");
-            sb.AppendLine($"Град: {city}");
-            sb.AppendLine($"Адрес: {address}");
-            sb.AppendLine($"Телефон: {phone}");
-            sb.AppendLine();
-            sb.AppendLine("Начин на плащане: Наложен платеж при доставка.");
-            sb.AppendLine("Очакван срок за доставка: 3–5 работни дни.");
-            sb.AppendLine();
-            sb.AppendLine("С хармония,");
-            sb.AppendLine("Music & Mind");
-
-            // 📧 Изпращане на e-mail
+            // ✅ Запис в DB
             try
             {
-                // четем настройките от appsettings.json -> "SMTP": { ... }
+                var order = new Order
+                {
+                    UserId = userId,
+                    UserEmail = customerEmail,
+                    Name = name,
+                    City = city,
+                    Address = address,
+                    Phone = phone,
+                    TotalAmount = total,
+                    CreatedAt = DateTime.Now
+                };
+
+                foreach (var item in cart)
+                {
+                    order.Items.Add(new OrderItem
+                    {
+                        ProductId = item.Product.Id,
+                        ProductName = item.Product.Name,
+                        UnitPrice = item.Product.Price,
+                        Quantity = item.Quantity
+                    });
+                }
+
+                _db.Orders.Add(order);
+                _db.SaveChanges();
+            }
+            catch { }
+
+            // Email клиент
+            var customerSb = new StringBuilder();
+            customerSb.AppendLine($"Здравей, {name}!");
+            customerSb.AppendLine();
+            customerSb.AppendLine("Благодарим ти за поръчката в Music & Mind.");
+            customerSb.AppendLine();
+            customerSb.AppendLine("Детайли за поръчката:");
+
+            foreach (var item in cart)
+                customerSb.AppendLine($" • {item.Product.Name} — {item.Quantity} x {item.Product.Price:0.00} €");
+
+            customerSb.AppendLine();
+            customerSb.AppendLine($"Обща сума: {total:0.00} €");
+            customerSb.AppendLine();
+            customerSb.AppendLine("Данни за доставка:");
+            customerSb.AppendLine($"Име: {name}");
+            customerSb.AppendLine($"Град: {city}");
+            customerSb.AppendLine($"Адрес: {address}");
+            customerSb.AppendLine($"Телефон: {phone}");
+            customerSb.AppendLine();
+            customerSb.AppendLine("Начин на плащане: Наложен платеж при доставка.");
+            customerSb.AppendLine("Очакван срок за доставка: 3–5 работни дни.");
+            customerSb.AppendLine();
+            customerSb.AppendLine("С хармония,");
+            customerSb.AppendLine("Music & Mind");
+
+            // Email админ
+            var adminSb = new StringBuilder();
+            adminSb.AppendLine("Нова поръчка в Music & Mind");
+            adminSb.AppendLine();
+            adminSb.AppendLine("Детайли:");
+
+            foreach (var item in cart)
+                adminSb.AppendLine($" • {item.Product.Name} — {item.Quantity} x {item.Product.Price:0.00} €");
+
+            adminSb.AppendLine();
+            adminSb.AppendLine($"Обща сума: {total:0.00} €");
+            adminSb.AppendLine();
+            adminSb.AppendLine("Доставка:");
+            adminSb.AppendLine($"Име: {name}");
+            adminSb.AppendLine($"Град: {city}");
+            adminSb.AppendLine($"Адрес: {address}");
+            adminSb.AppendLine($"Телефон: {phone}");
+            adminSb.AppendLine();
+            adminSb.AppendLine($"Клиент (акаунт email): {customerEmail}");
+
+            try
+            {
                 var host = _config["SMTP:Host"];
                 int port = int.TryParse(_config["SMTP:Port"], out var parsedPort) ? parsedPort : 587;
                 bool enableSsl = bool.TryParse(_config["SMTP:EnableSSL"], out var parsedSsl) ? parsedSsl : true;
@@ -151,29 +219,36 @@ namespace MusicAndMind2.Controllers
                 var pass = _config["SMTP:Password"];
                 var from = _config["SMTP:From"] ?? user;
                 var fromName = _config["SMTP:FromName"] ?? "Music & Mind";
-
-                var message = new MailMessage();
-                message.From = new MailAddress(from, fromName);
-                message.To.Add(toEmail);
-                message.Subject = "Потвърждение на поръчка";
-                message.Body = sb.ToString();
-                message.IsBodyHtml = false;
+                var adminEmail = _config["SMTP:AdminEmail"] ?? user;
 
                 using (var smtp = new SmtpClient(host, port))
                 {
                     smtp.EnableSsl = enableSsl;
                     smtp.Credentials = new NetworkCredential(user, pass);
-                    smtp.Send(message);
+
+                    var msgCustomer = new MailMessage();
+                    msgCustomer.From = new MailAddress(from, fromName);
+                    msgCustomer.To.Add(customerEmail);
+                    msgCustomer.Subject = "Потвърждение на поръчка";
+                    msgCustomer.Body = customerSb.ToString();
+                    msgCustomer.IsBodyHtml = false;
+                    smtp.Send(msgCustomer);
+
+                    var msgAdmin = new MailMessage();
+                    msgAdmin.From = new MailAddress(from, fromName);
+                    msgAdmin.To.Add(adminEmail);
+                    msgAdmin.Subject = "Нова поръчка (Music & Mind)";
+                    msgAdmin.Body = adminSb.ToString();
+                    msgAdmin.IsBodyHtml = false;
+                    smtp.Send(msgAdmin);
                 }
             }
             catch (Exception ex)
             {
-                // ❗ Записваме грешката, за да я видиш в OrderSuccess
                 TempData["MailError"] = ex.ToString();
             }
 
-            // 🗑 Изчистваме кошницата след поръчка
-            SaveCart(new List<Product>());
+            SaveCart(new List<CartSessionItem>());
 
             TempData["OrderName"] = name;
             TempData["OrderPayment"] = "Наложен платеж 🚚";
@@ -181,12 +256,11 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(OrderSuccess));
         }
 
-        // 🎉 Успешна поръчка
         public IActionResult OrderSuccess()
         {
             ViewBag.Name = TempData["OrderName"];
             ViewBag.Payment = TempData["OrderPayment"];
-            ViewBag.MailError = TempData["MailError"]; // добавяме грешката, ако има
+            ViewBag.MailError = TempData["MailError"];
             return View();
         }
     }

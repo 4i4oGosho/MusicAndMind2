@@ -20,7 +20,13 @@
     <div class="product-actions">
         @if (User.Identity.IsAuthenticated)
         {
-            <button type="button" class="btn-buy" onclick="addToCart(@Model.Id)">Добави в кошницата 🛒</button>
+            <div class="qty-row">
+                <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+                <input id="qtyInput" class="qty-input" type="text" value="1" readonly />
+                <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+
+            <button type="button" class="btn-buy" onclick="addToCartQty(@Model.Id)">Добави в кошницата 🛒</button>
         }
         else
         {
@@ -37,31 +43,47 @@
 
 @section Scripts {
     <script>
-        function addToCart(id) {
-            fetch('/Cart/AddToCart', {
+        function getQty() {
+            const v = parseInt(document.getElementById('qtyInput').value, 10);
+            return isNaN(v) ? 1 : v;
+        }
+
+        function setQty(v) {
+            if (v < 1) v = 1;
+            document.getElementById('qtyInput').value = v;
+        }
+
+        function changeQty(delta) {
+            setQty(getQty() + delta);
+        }
+
+        function addToCartQty(id) {
+            const qty = getQty();
+
+            fetch('/Cart/AddToCartQty', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: `id=${id}`,
+                body: `id=${encodeURIComponent(id)}&qty=${encodeURIComponent(qty)}`,
                 credentials: 'include'
             })
-            .then(response => {
-                if (!response.ok) throw new Error("Server error");
-                return response.json();
-            })
+            .then(r => r.json())
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     showCartMessage();
-                    updateCartCount();
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge && typeof data.count === 'number') {
+                        badge.textContent = data.count;
+                        badge.classList.add('animate');
+                        setTimeout(() => badge.classList.remove('animate'), 400);
+                    }
                 } else {
                     alert('⚠️ Възникна проблем при добавянето.');
                 }
             })
-            .catch(() => {
-                alert('⚠️ Грешка при обработката на заявката.');
-            });
+            .catch(() => alert('⚠️ Грешка при обработката на заявката.'));
         }
 
         function showCartMessage() {
@@ -72,22 +94,6 @@
                 msg.style.opacity = 0;
                 setTimeout(() => msg.style.display = 'none', 400);
             }, 1000);
-        }
-
-        function updateCartCount() {
-            fetch('/Cart/Index')
-                .then(r => r.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const count = doc.querySelectorAll('.cart-item').length;
-                    const badge = document.querySelector('.cart-badge');
-                    if (badge) {
-                        badge.textContent = count;
-                        badge.classList.add('animate');
-                        setTimeout(() => badge.classList.remove('animate'), 400);
-                    }
-                });
         }
     </script>
 }
@@ -147,6 +153,43 @@
         gap: 1rem;
     }
 
+    .qty-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .qty-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .qty-btn:hover {
+            background: #ff69b4;
+            transform: scale(1.05);
+        }
+
+    .qty-input {
+        width: 80px;
+        text-align: center;
+        padding: 0.7rem 0.6rem;
+        border: none;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
     .btn-buy,
     .btn-login-required,
     .btn-back {
@@ -160,7 +203,6 @@
         text-decoration: none;
     }
 
-    /* 🛍️ Активен бутон */
     .btn-buy {
         background: #ff69b4;
         color: #fff;
@@ -172,7 +214,6 @@
             transform: scale(1.05);
         }
 
-    /* 🔒 Заключен бутон */
     .btn-login-required {
         background: rgba(255, 255, 255, 0.1);
         color: #fff;
@@ -188,7 +229,6 @@
             color: #fff;
         }
 
-    /* ⬅ Бутон за връщане */
     .btn-back {
         background: transparent;
         color: #ff69b4;
@@ -200,7 +240,6 @@
             color: white;
         }
 
-    /* ✅ Нотификация */
     .cart-message {
         position: fixed;
         top: 90px;

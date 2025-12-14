@@ -15,27 +15,27 @@
     <div class="product-grid">
         @foreach (var item in Model)
         {
-            <div class="product-card">
+            <div class="product-card" onclick="goToDetails(@item.Id)">
                 <img src="@item.ImageUrl" alt="@item.Name" class="product-image" />
 
                 <h3 class="product-name">
-                    <a href="/Shop/Details/@item.Id">@item.Name</a>
+                    <a href="/Shop/Details/@item.Id" onclick="stopHere(event)">@item.Name</a>
                 </h3>
 
                 <p class="product-description">@item.Description</p>
                 <p class="product-frequency">🧠 @item.FrequencyInfo</p>
 
-                <audio controls class="product-audio">
+                <audio controls class="product-audio" onclick="stopHere(event)">
                     <source src="@item.SoundUrl" type="audio/mp3" />
                     Вашият браузър не поддържа аудио елемента.
                 </audio>
 
-                <div class="product-footer">
+                <div class="product-footer" onclick="stopHere(event)">
                     <span class="product-price">@item.Price.ToString("F2") €</span>
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <button class="btn-buy" onclick="addToCart(@item.Id)">Добави в кошницата</button>
+                        <button class="btn-buy" type="button" onclick="addToCart(@item.Id); stopHere(event);">Добави в кошницата</button>
                     }
                     else
                     {
@@ -49,6 +49,15 @@
 
 @section Scripts {
     <script>
+        function goToDetails(id) {
+            window.location.href = `/Shop/Details/${id}`;
+        }
+
+        // ✅ Спира клика да стигне до card-а
+        function stopHere(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+        }
+
         // 🛍️ Добавяне в кошницата без презареждане
         function addToCart(id) {
             fetch('/Cart/AddToCart', {
@@ -60,29 +69,27 @@
                 body: `id=${encodeURIComponent(id)}`,
                 credentials: 'include'
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.success) {
-                    showCartMessage();
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.success) {
+                        showCartMessage();
 
-                    // 🔢 обновяваме значката на количката с броя артикули
-                    const badge = document.querySelector('.cart-badge');
-                    if (badge && typeof data.count === 'number') {
-                        badge.textContent = data.count;
-                        badge.classList.add('animate');
-                        setTimeout(() => badge.classList.remove('animate'), 400);
+                        const badge = document.querySelector('.cart-badge');
+                        if (badge && typeof data.count === 'number') {
+                            badge.textContent = data.count;
+                            badge.classList.add('animate');
+                            setTimeout(() => badge.classList.remove('animate'), 400);
+                        }
+                    } else {
+                        alert('⚠️ Възникна проблем при добавянето в кошницата.');
                     }
-                } else {
-                    alert('⚠️ Възникна проблем при добавянето в кошницата.');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('⚠️ Грешка при обработката на заявката.');
-            });
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('⚠️ Грешка при обработката на заявката.');
+                });
         }
 
-        // ✅ Показваме малка нотификация
         function showCartMessage() {
             const msg = document.getElementById('cartMessage');
             msg.style.display = 'block';
@@ -133,6 +140,7 @@
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
 
         .product-card:hover {
@@ -151,6 +159,11 @@
         font-size: 1.2rem;
         margin-bottom: 0.5rem;
     }
+
+        .product-name a {
+            color: inherit;
+            text-decoration: none;
+        }
 
     .product-description {
         font-size: 0.9rem;
@@ -199,7 +212,6 @@
             transform: scale(1.05);
         }
 
-    /* 🚫 Бутон за гостите */
     .btn-login-required {
         background: rgba(255, 255, 255, 0.1);
         color: #fff;
@@ -215,7 +227,6 @@
             color: #fff;
         }
 
-    /* ✅ Нотификация при добавяне */
     .cart-message {
         position: fixed;
         top: 90px;

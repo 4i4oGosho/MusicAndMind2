@@ -6,13 +6,12 @@ using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using MusicAndMind2.Data;
+using MusicAndMind2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🧩 Локализация
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// 🧩 Entity Framework Core + Identity + роли (SQL Server LocalDB)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -20,12 +19,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 🧩 MVC + локализация
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// 🧺 Сесии (за кошницата)
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -33,9 +30,14 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// 🔔 SMS SERVICES
+builder.Services.Configure<SmsSettings>(
+    builder.Configuration.GetSection("SMS"));
+
+builder.Services.AddScoped<ISmsSender, TwilioSmsSender>();
+
 var app = builder.Build();
 
-// 🧩 Култури
 var supportedCultures = new[] { new CultureInfo("bg"), new CultureInfo("en") };
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
@@ -44,7 +46,6 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
-// 🧩 Стандартни middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,10 +56,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseSession();
 
-// ❗ Пренасочване на Identity Login към твоето Auth/Login
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
@@ -66,7 +65,6 @@ app.Use(async (context, next) =>
         context.Response.Redirect("/Auth/Login");
         return;
     }
-
     await next();
 });
 
@@ -77,16 +75,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 🧩 Автоматично създаване на роля Admin и админ акаунт
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
     if (!await roleManager.RoleExistsAsync("Admin"))
-    {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
-    }
 
     string adminEmail = "admin@musicmind.com";
     string adminPass = "Admin123!";

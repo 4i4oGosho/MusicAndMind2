@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MusicAndMind2.Data;
-using MusicAndMind2.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MusicAndMind2.Controllers
 {
@@ -23,40 +23,27 @@ namespace MusicAndMind2.Controllers
             _context = context;
         }
 
-        // === УПРАВЛЕНИЕ НА ПОТРЕБИТЕЛИ =====================
-
         public IActionResult Index()
         {
             var users = _userManager.Users.ToList();
             return View(users);
         }
 
-        // POST: /Admin/DeleteUser
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest();
-            }
+            if (string.IsNullOrEmpty(id)) return BadRequest();
 
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
-            // не трие нищо друго – само Identity записа
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
-                {
                     ModelState.AddModelError(string.Empty, error.Description);
-                }
 
-                // върни списъка с потребители + грешки
                 var users = _userManager.Users.ToList();
                 return View("Index", users);
             }
@@ -64,9 +51,33 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // === УПРАВЛЕНИЕ НА ПРОДУКТИ =========================
+        // ✅ Поръчки по потребители
+        public IActionResult UsersOrders()
+        {
+            var users = _userManager.Users.ToList();
+            return View(users);
+        }
 
-        // Списък с продукти
+        // ✅ Поръчки на конкретен потребител
+        public IActionResult UserOrders(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
+
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+
+            var orders = _context.Orders
+                .Include(o => o.Items)
+                .Where(o => o.UserId == id)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            ViewBag.UserEmail = user.Email;
+            ViewBag.UserId = user.Id;
+
+            return View(orders);
+        }
+
         public IActionResult ProductList()
         {
             var products = _context.Products
@@ -76,22 +87,16 @@ namespace MusicAndMind2.Controllers
             return View(products);
         }
 
-        // Създаване на продукт - GET
         public IActionResult CreateProduct()
         {
-            var model = new Product();
-            return View(model);
+            return View(new MusicAndMind2.Models.Product());
         }
 
-        // Създаване на продукт - POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateProduct(Product model)
+        public IActionResult CreateProduct(MusicAndMind2.Models.Product model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             model.CreatedAt = DateTime.Now;
 
@@ -101,27 +106,19 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(ProductList));
         }
 
-        // Редакция - GET
         public IActionResult EditProduct(int id)
         {
             var product = _context.Products.Find(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
             return View(product);
         }
 
-        // Редакция - POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditProduct(Product model)
+        public IActionResult EditProduct(MusicAndMind2.Models.Product model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             _context.Products.Update(model);
             _context.SaveChanges();
@@ -129,28 +126,20 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(ProductList));
         }
 
-        // Изтриване - GET (екран за потвърждение на продукт)
         public IActionResult DeleteProduct(int id)
         {
             var product = _context.Products.Find(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
             return View(product);
         }
 
-        // Изтриване - POST (истинското триене на продукт)
         [HttpPost, ActionName("DeleteProduct")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteProductConfirmed(int id)
         {
             var product = _context.Products.Find(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
             _context.Products.Remove(product);
             _context.SaveChanges();

@@ -23,25 +23,28 @@
                 {
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:0.5rem;">@user.Email</td>
-                        <td style="padding:0.5rem;">
-                            @{
-                                // ако имаш EmailConfirmed claim в Identity – може да го показваш отделно
-                                // тук просто слагаме "—" понеже IdentityUser по дефолт няма това свойство
-                            }
-                            —
-                        </td>
+                        <td style="padding:0.5rem;">—</td>
                         <td style="padding:0.5rem; font-size:0.8rem; opacity:0.8;">@user.Id</td>
-                        <td style="padding:0.5rem; text-align:right;">
+                        <td style="padding:0.5rem; text-align:right; display:flex; gap:0.5rem; justify-content:flex-end;">
+
+                            <a href="/Admin/UserOrders/@user.Id"
+                               style="background:#ff69b4; border:none; padding:0.35rem 0.9rem;
+                                          border-radius:999px; font-size:0.8rem; font-weight:600;
+                                          cursor:pointer; text-decoration:none; color:white;">
+                                Покупки
+                            </a>
+
                             <form asp-action="DeleteUser" method="post" style="display:inline;"
                                   onsubmit="return confirm('Наистина ли искаш да изтриеш този акаунт?');">
                                 <input type="hidden" name="id" value="@user.Id" />
                                 <button type="submit"
                                         style="background:#ff4b6e; border:none; padding:0.35rem 0.9rem;
-                                               border-radius:999px; font-size:0.8rem; font-weight:600;
-                                               cursor:pointer;">
+                                                   border-radius:999px; font-size:0.8rem; font-weight:600;
+                                                   cursor:pointer;">
                                     Изтрий
                                 </button>
                             </form>
+
                         </td>
                     </tr>
                 }

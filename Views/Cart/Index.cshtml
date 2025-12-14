@@ -1,4 +1,4 @@
-﻿@model List<MusicAndMind2.Models.Product>
+﻿@model List<MusicAndMind2.Models.CartSessionItem>
 
 @{
     ViewData["Title"] = "Вашата кошница";
@@ -18,12 +18,15 @@
             @foreach (var item in Model)
             {
                 <li class="cart-item">
-                    <img src="@item.ImageUrl" alt="@item.Name" />
+                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
                     <div class="cart-info">
-                        <h3>@item.Name</h3>
-                        <p>@item.Price.ToString("0.00") €</p>
+                        <h3>@item.Product.Name</h3>
+                        <p>@item.Product.Price.ToString("0.00") €</p>
+
+                        <p>Бройки: @item.Quantity</p>
+
                         <form asp-action="RemoveFromCart" method="post">
-                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="id" value="@item.Product.Id" />
                             <button type="submit" class="btn-remove">❌ Премахни</button>
                         </form>
                     </div>

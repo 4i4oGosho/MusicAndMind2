@@ -5,7 +5,6 @@ namespace MusicAndMind2.Controllers
 {
     public class ShopController : Controller
     {
-        // 🛒 Примерни продукти
         public static readonly List<Product> Products = new()
         {
             new Product
@@ -56,7 +55,6 @@ namespace MusicAndMind2.Controllers
                 Category = "Калимби",
                 LongDescription = "Калимбата е африкански музикален инструмент с дървен резонатор и метални езичета, които създават меки, хармонични звуци. Чудесен избор за начинаещи и напреднали, които търсят баланс между музика и медитация."
             },
-            // 🌸 Нови продукти
             new Product
             {
                 Id = 5,
@@ -119,11 +117,9 @@ namespace MusicAndMind2.Controllers
             }
         };
 
-        // 🪷 Магазин
         [HttpGet]
         public IActionResult Index() => View(Products);
 
-        // 🧭 Детайли за конкретен продукт
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -134,7 +130,6 @@ namespace MusicAndMind2.Controllers
             return View(product);
         }
 
-        // 🛍️ При натискане на "Купи"
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult Checkout(int productId, string paymentMethod)
@@ -155,7 +150,6 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(Success));
         }
 
-        // 💫 Страница "Благодарим за поръчката"
         [HttpGet]
         public IActionResult Success()
         {
