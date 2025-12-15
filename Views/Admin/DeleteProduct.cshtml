@@ -1,0 +1,134 @@
+﻿@model MusicAndMind2.Models.Product
+
+@{
+    ViewData["Title"] = "Изтриване на продукт";
+}
+
+<div class="mm-admin-wrap">
+    <div class="mm-admin-card">
+        <h1 class="mm-admin-title">Изтриване на продукт</h1>
+        <p class="mm-admin-subtitle">Сигурен ли си, че искаш да изтриеш този продукт?</p>
+
+        <div class="mm-summary">
+            <div class="mm-row">
+                <span class="mm-label">Име</span>
+                <span class="mm-value">@Model.Name</span>
+            </div>
+
+            <div class="mm-row">
+                <span class="mm-label">Категория</span>
+                <span class="mm-value">@Model.Category</span>
+            </div>
+
+            <div class="mm-row">
+                <span class="mm-label">Цена</span>
+                <span class="mm-value">@Model.Price.ToString("0.00") лв.</span>
+            </div>
+        </div>
+
+        <form asp-action="DeleteProduct" method="post" class="mm-actions">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <button type="submit" class="mm-btn mm-btn-pink">Да, изтрий</button>
+            <a asp-action="ProductList" class="mm-btn mm-btn-light">Отказ</a>
+        </form>
+    </div>
+</div>
+
+<style>
+    .mm-admin-wrap {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .mm-admin-card {
+        width: min(520px, 100%);
+        padding: 26px 26px 22px;
+        border-radius: 18px;
+        background: rgba(25,25,25,.55);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .mm-admin-title {
+        margin: 0 0 6px;
+        font-size: 34px;
+        font-weight: 800;
+        color: #fff;
+        text-align: center;
+    }
+
+    .mm-admin-subtitle {
+        margin: 0 0 18px;
+        color: rgba(255,255,255,.75);
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .mm-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(0,0,0,.20);
+        border: 1px solid rgba(255,255,255,.10);
+        margin-bottom: 16px;
+    }
+
+    .mm-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        color: #fff;
+    }
+
+    .mm-label {
+        color: rgba(255,255,255,.70);
+    }
+
+    .mm-value {
+        font-weight: 700;
+    }
+
+    .mm-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin-top: 6px;
+    }
+
+    .mm-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-weight: 700;
+        text-decoration: none;
+        border: 0;
+        cursor: pointer;
+        transition: transform .08s ease, opacity .12s ease;
+    }
+
+        .mm-btn:active {
+            transform: scale(.98);
+        }
+
+    .mm-btn-light {
+        background: #fff;
+        color: #111;
+    }
+
+    .mm-btn-pink {
+        background: #ff69b4;
+        color: #111;
+    }
+</style>

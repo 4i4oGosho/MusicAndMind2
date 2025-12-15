@@ -1,81 +1,287 @@
 ﻿@model IEnumerable<MusicAndMind2.Models.Product>
 
 @{
-    ViewData["Title"] = "Продукти";
+    ViewData["Title"] = "Управление на продукти";
 }
 
-<div class="container mt-5 mb-5 text-light">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold">Управление на продукти</h2>
-            <p class="text-muted mb-0">Добавяй, редактирай и скривай продукти от магазина.</p>
-        </div>
-        <a asp-action="CreateProduct" class="btn btn-outline-light px-4 py-2 rounded-pill">
-            + Нов продукт
-        </a>
-    </div>
+<div class="mm-admin-wrap">
+    <div class="mm-admin-card mm-admin-card-wide">
+        <div class="mm-admin-head">
+            <div>
+                <h1 class="mm-admin-title">Управление на продукти</h1>
+                <p class="mm-admin-subtitle">Добавяй, редактирай и скривай продукти от магазина.</p>
+            </div>
 
-    <div class="card bg-dark border-0 shadow-lg rounded-4">
-        <div class="card-body">
-            @if (!Model.Any())
-            {
-                <p class="text-muted mb-0">Все още няма добавени продукти.</p>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Снимка</th>
-                                <th>Име</th>
-                                <th>Категория</th>
-                                <th>Цена</th>
-                                <th>Наличен</th>
-                                <th>Създаден</th>
-                                <th class="text-end">Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var p in Model)
-                            {
-                                <tr>
-                                    <td style="width: 80px;">
-                                        @if (!string.IsNullOrEmpty(p.ImageUrl))
-                                        {
-                                            <img src="@p.ImageUrl" alt="@p.Name" class="img-fluid rounded-3" />
-                                        }
-                                    </td>
-                                    <td class="fw-semibold">@p.Name</td>
-                                    <td>@p.Category</td>
-                                    <td>@p.Price.ToString("F2") €.</td>
-                                    <td>
-                                        @if (p.IsAvailable)
-                                        {
-                                            <span class="badge bg-success">Да</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">Не</span>
-                                        }
-                                    </td>
-                                    <td>@p.CreatedAt.ToString("dd.MM.yyyy")</td>
-                                    <td class="text-end">
-                                        <a asp-action="EditProduct" asp-route-id="@p.Id"
-                                           class="btn btn-sm btn-outline-light rounded-pill me-2">
-                                            Редакция
-                                        </a>
-                                        <a asp-action="DeleteProduct" asp-route-id="@p.Id"
-                                           class="btn btn-sm btn-outline-danger rounded-pill">
-                                            Изтриване
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+            <a asp-action="CreateProduct" class="mm-btn mm-btn-pink">+ Нов продукт</a>
         </div>
+
+        @if (!Model.Any())
+        {
+            <div class="mm-empty">
+                Все още няма добавени продукти.
+            </div>
+        }
+        else
+        {
+            <div class="mm-table">
+                <div class="mm-thead">
+                    <div>Снимка</div>
+                    <div>Име</div>
+                    <div>Категория</div>
+                    <div>Цена</div>
+                    <div>Наличен</div>
+                    <div>Създаден</div>
+                    <div class="mm-right">Действия</div>
+                </div>
+
+                @foreach (var p in Model)
+                {
+                    <div class="mm-tr">
+                        <div class="mm-imgcell">
+                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl" alt="@p.Name" class="mm-thumb" />
+                            }
+                            else
+                            {
+                                <div class="mm-thumb mm-thumb-empty">—</div>
+                            }
+                        </div>
+
+                        <div class="mm-strong">@p.Name</div>
+                        <div>@p.Category</div>
+                        <div>@p.Price.ToString("0.00") лв.</div>
+
+                        <div>
+                            @if (p.IsAvailable)
+                            {
+                                <span class="mm-badge mm-badge-on">Да</span>
+                            }
+                            else
+                            {
+                                <span class="mm-badge mm-badge-off">Не</span>
+                            }
+                        </div>
+
+                        <div>@p.CreatedAt.ToString("dd.MM.yyyy")</div>
+
+                        <div class="mm-actions mm-right">
+                            <a asp-action="EditProduct" asp-route-id="@p.Id" class="mm-btn mm-btn-light mm-btn-sm">
+                                Редакция
+                            </a>
+
+                            <a asp-action="DeleteProduct" asp-route-id="@p.Id" class="mm-btn mm-btn-danger mm-btn-sm">
+                                Изтриване
+                            </a>
+
+                            <form asp-action="ToggleAvailability" method="post" class="mm-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@p.Id" />
+
+                                @if (p.IsAvailable)
+                                {
+                                    <button type="submit" class="mm-btn mm-btn-ghost mm-btn-sm">Скрий</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="mm-btn mm-btn-ghost mm-btn-sm">Покажи</button>
+                                }
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>
+
+<style>
+    .mm-admin-wrap {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .mm-admin-card {
+        width: min(900px, 100%);
+        padding: 22px;
+        border-radius: 18px;
+        background: rgba(25,25,25,.55);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #fff;
+    }
+
+    .mm-admin-card-wide {
+        width: min(1100px, 100%);
+    }
+
+    .mm-admin-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .mm-admin-title {
+        margin: 0 0 6px;
+        font-size: 30px;
+        font-weight: 900;
+    }
+
+    .mm-admin-subtitle {
+        margin: 0;
+        color: rgba(255,255,255,.75);
+        font-size: 14px;
+    }
+
+    .mm-empty {
+        padding: 16px;
+        border-radius: 14px;
+        background: rgba(0,0,0,.20);
+        border: 1px solid rgba(255,255,255,.10);
+        color: rgba(255,255,255,.85);
+    }
+
+    .mm-table {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .mm-thead, .mm-tr {
+        display: grid;
+        grid-template-columns: 90px 1.2fr .9fr .6fr .55fr .7fr 1.2fr;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .mm-thead {
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(0,0,0,.22);
+        border: 1px solid rgba(255,255,255,.10);
+        font-weight: 800;
+        color: rgba(255,255,255,.85);
+        font-size: 13px;
+    }
+
+    .mm-tr {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(0,0,0,.18);
+        border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .mm-imgcell {
+        display: flex;
+    }
+
+    .mm-thumb {
+        width: 70px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06);
+    }
+
+    .mm-thumb-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,.55);
+        font-weight: 800;
+    }
+
+    .mm-strong {
+        font-weight: 800;
+    }
+
+    .mm-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .mm-badge-on {
+        background: rgba(255,105,180,.18);
+        color: #ffd1e7;
+    }
+
+    .mm-badge-off {
+        background: rgba(255,255,255,.08);
+        color: rgba(255,255,255,.75);
+    }
+
+    .mm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .mm-right {
+        justify-self: end;
+        text-align: right;
+    }
+
+    .mm-inline {
+        display: inline;
+    }
+
+    .mm-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-weight: 900;
+        text-decoration: none;
+        border: 0;
+        cursor: pointer;
+        transition: transform .08s ease, opacity .12s ease;
+        white-space: nowrap;
+    }
+
+        .mm-btn:active {
+            transform: scale(.98);
+        }
+
+    .mm-btn-sm {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .mm-btn-light {
+        background: #fff;
+        color: #111;
+    }
+
+    .mm-btn-pink {
+        background: #ff69b4;
+        color: #111;
+    }
+
+    .mm-btn-danger {
+        background: rgba(255,80,120,.22);
+        color: #ffd1e1;
+        border: 1px solid rgba(255,80,120,.35);
+    }
+
+    .mm-btn-ghost {
+        background: rgba(255,255,255,.08);
+        color: rgba(255,255,255,.9);
+        border: 1px solid rgba(255,255,255,.12);
+    }
+</style>

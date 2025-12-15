@@ -146,5 +146,18 @@ namespace MusicAndMind2.Controllers
 
             return RedirectToAction(nameof(ProductList));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleAvailability(int id)
+        {
+            var product = _context.Products.Find(id);
+            if (product == null) return NotFound();
+
+            product.IsAvailable = !product.IsAvailable;
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(ProductList));
+        }
+
     }
 }

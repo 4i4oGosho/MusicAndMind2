@@ -1,0 +1,234 @@
+﻿@model MusicAndMind2.Models.Product
+
+@{
+    ViewData["Title"] = "Редакция на продукт";
+}
+
+<div class="mm-admin-wrap">
+    <div class="mm-admin-card">
+        <h1 class="mm-admin-title">Редакция на продукт</h1>
+        <p class="mm-admin-subtitle">Обнови информацията за продукта в магазина.</p>
+
+        <form asp-action="EditProduct" method="post" class="mm-form">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+
+            <div class="mm-field">
+                <input asp-for="Name" class="mm-input" placeholder="Име на продукта" />
+                <span asp-validation-for="Name" class="mm-error"></span>
+            </div>
+
+            <div class="mm-field">
+                <textarea asp-for="Description" class="mm-textarea" placeholder="Кратко описание"></textarea>
+                <span asp-validation-for="Description" class="mm-error"></span>
+            </div>
+
+            <div class="mm-field">
+                <textarea asp-for="LongDescription" class="mm-textarea" placeholder="Разширено описание (по желание)"></textarea>
+                <span asp-validation-for="LongDescription" class="mm-error"></span>
+            </div>
+
+            <div class="mm-field">
+                <input asp-for="Price" class="mm-input" placeholder="Цена (лв.)" />
+                <span asp-validation-for="Price" class="mm-error"></span>
+            </div>
+
+            <div class="mm-field">
+                <input asp-for="Category" class="mm-input" placeholder="Категория (Купа, Камертон, Гонг...)" />
+                <span asp-validation-for="Category" class="mm-error"></span>
+            </div>
+
+            <div class="mm-field">
+                <input asp-for="ImageUrl" class="mm-input" placeholder="URL на снимка (/images/shop/...)" />
+                <span asp-validation-for="ImageUrl" class="mm-error"></span>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <div class="mm-preview">
+                        <img src="@Model.ImageUrl" alt="Product image" class="mm-preview-img" />
+                    </div>
+                }
+            </div>
+
+            <div class="mm-field">
+                <input asp-for="SoundUrl" class="mm-input" placeholder="URL на звук (демо) (/audio/...)" />
+                <span asp-validation-for="SoundUrl" class="mm-error"></span>
+
+                @if (!string.IsNullOrWhiteSpace(Model.SoundUrl))
+                {
+                    <div class="mm-preview">
+                        <audio controls class="mm-audio">
+                            <source src="@Model.SoundUrl" />
+                        </audio>
+                    </div>
+                }
+            </div>
+
+            <div class="mm-field">
+                <textarea asp-for="FrequencyInfo" class="mm-textarea" placeholder="Инфо за честоти / мозъчни вълни"></textarea>
+                <span asp-validation-for="FrequencyInfo" class="mm-error"></span>
+            </div>
+
+            <div class="mm-check">
+                <input asp-for="IsAvailable" class="mm-checkbox" />
+                <label asp-for="IsAvailable" class="mm-check-label">Наличен в магазина</label>
+            </div>
+
+            <div class="mm-actions">
+                <a asp-action="ProductList" class="mm-btn mm-btn-light">Назад</a>
+                <button type="submit" class="mm-btn mm-btn-pink">Запази</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .mm-admin-wrap {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .mm-admin-card {
+        width: min(520px, 100%);
+        padding: 26px 26px 22px;
+        border-radius: 18px;
+        background: rgba(25,25,25,.55);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .mm-admin-title {
+        margin: 0 0 6px;
+        font-size: 34px;
+        font-weight: 800;
+        color: #fff;
+        text-align: center;
+    }
+
+    .mm-admin-subtitle {
+        margin: 0 0 18px;
+        color: rgba(255,255,255,.75);
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .mm-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .mm-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .mm-input, .mm-textarea {
+        width: 100%;
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.08);
+        color: #fff;
+        outline: none;
+    }
+
+        .mm-input::placeholder, .mm-textarea::placeholder {
+            color: rgba(255,255,255,.55);
+        }
+
+    .mm-textarea {
+        min-height: 86px;
+        resize: vertical;
+    }
+
+    .mm-error {
+        color: #ff7bb7;
+        font-size: 12px;
+    }
+
+    .mm-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 4px;
+        color: rgba(255,255,255,.85);
+    }
+
+    .mm-checkbox {
+        transform: scale(1.05);
+    }
+
+    .mm-check-label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .mm-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .mm-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-weight: 700;
+        text-decoration: none;
+        border: 0;
+        cursor: pointer;
+        transition: transform .08s ease, opacity .12s ease;
+    }
+
+        .mm-btn:active {
+            transform: scale(.98);
+        }
+
+    .mm-btn-light {
+        background: #fff;
+        color: #111;
+    }
+
+    .mm-btn-pink {
+        background: #ff69b4;
+        color: #111;
+    }
+
+    .mm-preview {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 14px;
+        background: rgba(0,0,0,.25);
+        border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .mm-preview-img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        display: block;
+    }
+
+    .mm-audio {
+        width: 100%;
+    }
+</style>

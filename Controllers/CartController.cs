@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using MusicAndMind2.Data;
+using System.Security.Claims;
 
 namespace MusicAndMind2.Controllers
 {
@@ -40,11 +41,17 @@ namespace MusicAndMind2.Controllers
             HttpContext.Session.SetString(CartSessionKey, JsonConvert.SerializeObject(cart));
         }
 
+        // ✅ Взимаме продукта от БД (а не от ShopController.Products)
+        private Product? GetProductFromDb(int id)
+        {
+            return _db.Products.FirstOrDefault(p => p.Id == id && p.IsAvailable);
+        }
+
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult AddToCart(int id)
         {
-            var product = ShopController.Products.FirstOrDefault(p => p.Id == id);
+            var product = GetProductFromDb(id);
             if (product == null) return NotFound();
 
             var cart = GetCart();
@@ -69,7 +76,7 @@ namespace MusicAndMind2.Controllers
         {
             if (qty < 1) qty = 1;
 
-            var product = ShopController.Products.FirstOrDefault(p => p.Id == id);
+            var product = GetProductFromDb(id);
             if (product == null) return NotFound();
 
             var cart = GetCart();
@@ -118,8 +125,13 @@ namespace MusicAndMind2.Controllers
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
 
+            // Сумирай цената на всички артикули в количката
+            var total = cart.Sum(i => i.Product.Price * i.Quantity);
+
+            // Предавай количката и общата стойност в view-то
             ViewBag.Cart = cart;
-            ViewBag.Total = cart.Sum(i => i.Product.Price * i.Quantity);
+            ViewBag.Total = total;
+
             return View();
         }
 
@@ -129,11 +141,11 @@ namespace MusicAndMind2.Controllers
             var cart = GetCart();
             if (!cart.Any()) return RedirectToAction("Index");
 
-            var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
             var customerEmail = User.Identity?.Name ?? "unknown@local";
             var total = cart.Sum(i => i.Product.Price * i.Quantity);
 
-            // ✅ Запис в DB
+            // Запис в DB
             try
             {
                 var order = new Order
