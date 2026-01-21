@@ -216,20 +216,25 @@ using (var scope = app.Services.CreateScope())
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
 
-    string adminEmail = "admin@musicmind.com";
-    string adminPass = "Admin123!";
+    var adminEmail = app.Configuration["AdminSeed:Email"];
+    var adminPass = app.Configuration["AdminSeed:Password"];
 
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
+    // Avoid hardcoded credentials in source control.
+    if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPass))
     {
-        adminUser = new IdentityUser
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
         {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-        await userManager.CreateAsync(adminUser, adminPass);
-        await userManager.AddToRoleAsync(adminUser, "Admin");
+            adminUser = new IdentityUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+
+            await userManager.CreateAsync(adminUser, adminPass);
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
 }
 

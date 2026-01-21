@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MusicAndMind2.Models;
 using Newtonsoft.Json;
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -232,6 +233,9 @@ namespace MusicAndMind2.Controllers
                 var from = _config["SMTP:From"] ?? user;
                 var fromName = _config["SMTP:FromName"] ?? "Music & Mind";
                 var adminEmail = _config["SMTP:AdminEmail"] ?? user;
+
+                if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass))
+                    throw new InvalidOperationException("SMTP credentials are not configured. Set SMTP:User and SMTP:Password via User Secrets or environment variables.");
 
                 using (var smtp = new SmtpClient(host, port))
                 {
