@@ -44,7 +44,41 @@ document.addEventListener('click', e => {
     }, { once: true });
 });
 
-// Theme toggle: inject minimal theme CSS and add toggle button (inserted in header)
+/* ===========================
+   Upload helpers (CreateProduct)
+   =========================== */
+function setChosenFile(input, labelId, hiddenFieldId) {
+    const labelEl = document.getElementById(labelId);
+    const hiddenEl = document.getElementById(hiddenFieldId);
+
+    if (!labelEl || !hiddenEl) return;
+
+    if (!input.files || !input.files.length) {
+        labelEl.textContent = "Избери файл";
+        hiddenEl.value = "";
+        return;
+    }
+
+    const fileName = input.files[0].name;
+    labelEl.textContent = fileName;
+
+    // Fill the hidden URL fields so your model binds ImageUrl/SoundUrl as before
+    if (hiddenFieldId === "ImageUrl") hiddenEl.value = "/images/shop/" + fileName;
+    if (hiddenFieldId === "SoundUrl") hiddenEl.value = "/audio/demo/" + fileName;
+}
+
+// Optional: make the whole "input-like upload field" clickable even if you click on its text/icon
+document.addEventListener('click', (e) => {
+    const imgPick = e.target.closest('[data-pick="image"]');
+    if (imgPick) document.getElementById('imageFile')?.click();
+
+    const sndPick = e.target.closest('[data-pick="sound"]');
+    if (sndPick) document.getElementById('soundFile')?.click();
+});
+
+/* ===========================
+   Theme toggle: inject minimal theme CSS and add toggle button (inserted in header)
+   =========================== */
 (function () {
     const themeCSS = `
 /* Light theme variables override (keep readable UI colors) */

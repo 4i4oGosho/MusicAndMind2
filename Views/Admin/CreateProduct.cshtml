@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* същият стил, който ползваш за checkout – можеш да го изнесеш по-късно в site.css */
     .checkout-container {
         text-align: center;
         color: var(--text-color, #fff);
@@ -101,7 +100,7 @@
             background: linear-gradient(90deg, #ff85c2, #ffb6d9);
             transform: scale(1.05);
         }
-    /* да изглежда като input-ите */
+
     textarea {
         padding: 0.8rem;
         border: none;
@@ -112,7 +111,7 @@
         width: 100%;
         box-sizing: border-box;
         transition: background 0.3s, transform 0.2s;
-        text-align: left; /* ако искаш да е центриран – махни този ред */
+        text-align: left;
     }
 
         textarea:focus {
@@ -124,7 +123,6 @@
             color: rgba(255,255,255,0.7);
         }
 
-    /* светла тема */
     body.light-theme textarea {
         background: rgba(0,0,0,0.05);
         color: #000;
@@ -134,13 +132,60 @@
             color: rgba(0,0,0,0.6);
         }
 
+    /* Upload buttons like your "Назад / Запази" vibe */
+    .btn-upload {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 0.7rem;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-upload-white {
+        background: #ffffff;
+        color: #111;
+        box-shadow: 0 0 10px rgba(255,255,255,0.25);
+    }
+
+        .btn-upload-white:hover {
+            transform: scale(1.05);
+            background: #f3f3f3;
+        }
+
+    .btn-upload-pink {
+        background: linear-gradient(90deg, #ff69b4, #ff85c2);
+        color: white;
+        box-shadow: 0 0 10px rgba(255,105,180,0.3);
+    }
+
+        .btn-upload-pink:hover {
+            background: linear-gradient(90deg, #ff85c2, #ffb6d9);
+            transform: scale(1.05);
+        }
+
+    /* Filename under the button */
+    .file-picked {
+        margin-top: -0.5rem;
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.85);
+        text-align: center;
+        word-break: break-word;
+    }
+
+    body.light-theme .file-picked {
+        color: rgba(0,0,0,0.75);
+    }
 </style>
 
 <div class="checkout-container">
     <h2>Нов продукт</h2>
     <p>Създай нов инструмент за магазина.</p>
 
-    <form asp-action="CreateProduct" method="post" class="checkout-form">
+    <!-- IMPORTANT: enctype for file uploads -->
+    <form asp-action="CreateProduct" method="post" class="checkout-form" enctype="multipart/form-data">
         <input asp-for="Name" placeholder="Име на продукта" />
         <span asp-validation-for="Name" class="text-danger small"></span>
 
@@ -156,16 +201,28 @@
         <input asp-for="Category" placeholder="Категория (Купа, Камертон, Гонг...)" />
         <span asp-validation-for="Category" class="text-danger small"></span>
 
-        <input asp-for="ImageUrl" placeholder="URL на снимка (/images/shop/bowl1.png)" />
+        <!-- IMAGE -->
+        <button type="button" class="btn-upload btn-upload-white" onclick="document.getElementById('imageFile').click()">
+            📷 Качи снимка
+        </button>
+        <input type="file" id="imageFile" name="ImageFile" accept="image/*" hidden
+               onchange="setChosenFile(this,'imagePicked','ImageUrl')" />
+        <div id="imagePicked" class="file-picked"></div>
+        <input asp-for="ImageUrl" type="hidden" />
         <span asp-validation-for="ImageUrl" class="text-danger small"></span>
 
-        <input asp-for="SoundUrl" placeholder="URL на звук (демо) (/audio/demo/bowl1.mp3)" />
+        <!-- SOUND -->
+        <button type="button" class="btn-upload btn-upload-pink" onclick="document.getElementById('soundFile').click()">
+            🔊 Качи звук (демо)
+        </button>
+        <input type="file" id="soundFile" name="SoundFile" accept="audio/*" hidden
+               onchange="setChosenFile(this,'soundPicked','SoundUrl')" />
+        <div id="soundPicked" class="file-picked"></div>
+        <input asp-for="SoundUrl" type="hidden" />
         <span asp-validation-for="SoundUrl" class="text-danger small"></span>
 
         <input asp-for="FrequencyInfo" placeholder="Инфо за честоти / мозъчни вълни" />
         <span asp-validation-for="FrequencyInfo" class="text-danger small"></span>
-
-
 
         <div class="form-check" style="text-align:left;margin-top:0.5rem;">
             <input asp-for="IsAvailable" class="form-check-input" />
@@ -182,3 +239,28 @@
         </div>
     </form>
 </div>
+
+<script>
+    // Shows the filename and optionally fills hidden URL (not required for saving if controller sets urls)
+    function setChosenFile(input, labelId, hiddenFieldId) {
+        const labelEl = document.getElementById(labelId);
+        const hiddenEl = document.getElementById(hiddenFieldId);
+
+        if (!labelEl) return;
+
+        if (!input.files || !input.files.length) {
+            labelEl.textContent = "";
+            if (hiddenEl) hiddenEl.value = "";
+            return;
+        }
+
+        const fileName = input.files[0].name;
+        labelEl.textContent = "Избран файл: " + fileName;
+
+        // Optional: set URL preview (controller will overwrite with GUID if you use that approach)
+        if (hiddenEl) {
+            if (hiddenFieldId === "ImageUrl") hiddenEl.value = "/images/shop/" + fileName;
+            if (hiddenFieldId === "SoundUrl") hiddenEl.value = "/audio/demo/" + fileName;
+        }
+    }
+</script>

@@ -1,11 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MusicAndMind2.Data;
 using Microsoft.EntityFrameworkCore;
+using MusicAndMind2.Data;
+using MusicAndMind2.Models;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MusicAndMind2.Controllers
 {
@@ -89,20 +92,56 @@ namespace MusicAndMind2.Controllers
 
         public IActionResult CreateProduct()
         {
-            return View(new MusicAndMind2.Models.Product());
+            return View(new Product());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateProduct(MusicAndMind2.Models.Product model)
+        public async Task<IActionResult> CreateProduct(Product product, IFormFile ImageFile, IFormFile SoundFile)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(product);
 
-            model.CreatedAt = DateTime.Now;
+            // ===== IMAGE =====
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                var imagesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "shop");
+                Directory.CreateDirectory(imagesDir);
 
-            _context.Products.Add(model);
-            _context.SaveChanges();
+                var imgExt = Path.GetExtension(ImageFile.FileName);
+                var imgName = $"{Guid.NewGuid()}{imgExt}";
+                var imgPath = Path.Combine(imagesDir, imgName);
 
+                using (var stream = new FileStream(imgPath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                product.ImageUrl = "/images/shop/" + imgName;
+            }
+
+            // ===== SOUND (DEMO) =====
+            if (SoundFile != null && SoundFile.Length > 0)
+            {
+                var audioDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "audio", "demo");
+                Directory.CreateDirectory(audioDir);
+
+                var sndExt = Path.GetExtension(SoundFile.FileName);
+                var sndName = $"{Guid.NewGuid()}{sndExt}";
+                var sndPath = Path.Combine(audioDir, sndName);
+
+                using (var stream = new FileStream(sndPath, FileMode.Create))
+                {
+                    await SoundFile.CopyToAsync(stream);
+                }
+
+                product.SoundUrl = "/audio/demo/" + sndName;
+            }
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            // След запис -> списъка с продукти
             return RedirectToAction(nameof(ProductList));
         }
 
@@ -116,7 +155,7 @@ namespace MusicAndMind2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditProduct(MusicAndMind2.Models.Product model)
+        public IActionResult EditProduct(Product model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -146,6 +185,7 @@ namespace MusicAndMind2.Controllers
 
             return RedirectToAction(nameof(ProductList));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleAvailability(int id)
@@ -158,6 +198,5 @@ namespace MusicAndMind2.Controllers
 
             return RedirectToAction(nameof(ProductList));
         }
-
     }
 }

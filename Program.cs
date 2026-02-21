@@ -30,7 +30,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// 🔔 SMS SERVICES
 builder.Services.Configure<SmsSettings>(
     builder.Configuration.GetSection("SMS"));
 
