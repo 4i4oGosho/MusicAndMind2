@@ -28,7 +28,23 @@ namespace MusicAndMind2.Controllers
 
         public IActionResult Index()
         {
-            var users = _userManager.Users.ToList();
+            var users = _userManager.Users
+                .ToList()
+                .Select(user => new AdminUserViewModel
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? "Без имейл",
+                    EmailConfirmed = user.EmailConfirmed,
+                    IsLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow,
+                    OrdersCount = _context.Orders.Count(o => o.UserId == user.Id),
+                    TotalSpent = _context.Orders
+                        .Where(o => o.UserId == user.Id)
+                        .SelectMany(o => o.Items)
+                        .Sum(i => (decimal?)i.UnitPrice * i.Quantity) ?? 0
+                })
+                .OrderBy(u => u.Email)
+                .ToList();
+
             return View(users);
         }
 
@@ -47,21 +63,58 @@ namespace MusicAndMind2.Controllers
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
 
-                var users = _userManager.Users.ToList();
-                return View("Index", users);
+                return RedirectToAction(nameof(Index));
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Поръчки по потребители
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleEmailConfirmed(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.EmailConfirmed = !user.EmailConfirmed;
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLockUser(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
+
+            if (isLocked)
+            {
+                user.LockoutEnd = null;
+            }
+            else
+            {
+                user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
+            }
+
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         public IActionResult UsersOrders()
         {
             var users = _userManager.Users.ToList();
             return View(users);
         }
 
-        // ✅ Поръчки на конкретен потребител
         public IActionResult UserOrders(string id)
         {
             if (string.IsNullOrEmpty(id)) return BadRequest();
@@ -102,7 +155,6 @@ namespace MusicAndMind2.Controllers
             if (!ModelState.IsValid)
                 return View(product);
 
-            // ===== IMAGE =====
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 var imagesDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "shop");
@@ -120,7 +172,6 @@ namespace MusicAndMind2.Controllers
                 product.ImageUrl = "/images/shop/" + imgName;
             }
 
-            // ===== SOUND (DEMO) =====
             if (SoundFile != null && SoundFile.Length > 0)
             {
                 var audioDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "audio", "demo");
@@ -141,7 +192,6 @@ namespace MusicAndMind2.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // След запис -> списъка с продукти
             return RedirectToAction(nameof(ProductList));
         }
 

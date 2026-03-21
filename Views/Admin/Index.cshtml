@@ -1,54 +1,333 @@
-﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+﻿@model IEnumerable<MusicAndMind2.Models.AdminUserViewModel>
 
 @{
-    ViewData["Title"] = "Всички регистрирани акаунти";
+    ViewData["Title"] = "Регистрирани акаунти";
 }
 
-<div class="checkout-container">
-    <h2>Всички регистрирани акаунти</h2>
-    <p>Списък с потребителите в системата. Можеш да изтриеш акаунт при нужда.</p>
-
-    <div class="cart-summary" style="max-width: 720px;">
-        <table style="width:100%; border-collapse:collapse; color:#fff;">
-            <thead>
-                <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                    <th style="padding:0.6rem; text-align:left;">Имейл</th>
-                    <th style="padding:0.6rem; text-align:left;">Потвърден</th>
-                    <th style="padding:0.6rem; text-align:left;">Id</th>
-                    <th style="padding:0.6rem; text-align:right;">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-                        <td style="padding:0.5rem;">@user.Email</td>
-                        <td style="padding:0.5rem;">—</td>
-                        <td style="padding:0.5rem; font-size:0.8rem; opacity:0.8;">@user.Id</td>
-                        <td style="padding:0.5rem; text-align:right; display:flex; gap:0.5rem; justify-content:flex-end;">
-
-                            <a href="/Admin/UserOrders/@user.Id"
-                               style="background:#ff69b4; border:none; padding:0.35rem 0.9rem;
-                                          border-radius:999px; font-size:0.8rem; font-weight:600;
-                                          cursor:pointer; text-decoration:none; color:white;">
-                                Покупки
-                            </a>
-
-                            <form asp-action="DeleteUser" method="post" style="display:inline;"
-                                  onsubmit="return confirm('Наистина ли искаш да изтриеш този акаунт?');">
-                                <input type="hidden" name="id" value="@user.Id" />
-                                <button type="submit"
-                                        style="background:#ff4b6e; border:none; padding:0.35rem 0.9rem;
-                                                   border-radius:999px; font-size:0.8rem; font-weight:600;
-                                                   cursor:pointer;">
-                                    Изтрий
-                                </button>
-                            </form>
-
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="admin-users-page">
+    <div class="admin-users-header">
+        <h1>Управление на потребители</h1>
+        <p>
+            Тук можеш да следиш потребителите, поръчките им и да управляваш достъпа им до системата.
+        </p>
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-users-box">
+            Няма регистрирани потребители в системата.
+        </div>
+    }
+    else
+    {
+        <div class="users-grid">
+            @foreach (var user in Model)
+            {
+                var initials = !string.IsNullOrWhiteSpace(user.Email)
+                ? user.Email.Substring(0, 1).ToUpper()
+                : "?";
+
+                <div class="user-card">
+                    <div class="user-top">
+                        <div class="user-avatar">@initials</div>
+
+                        <div class="user-main-info">
+                            <h3>@user.Email</h3>
+
+                            <div class="status-row">
+                                @if (user.EmailConfirmed)
+                                {
+                                    <span class="status-badge success">Потвърден имейл</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge warning">Непотвърден имейл</span>
+                                }
+
+                                @if (user.IsLocked)
+                                {
+                                    <span class="status-badge danger">Заключен</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge info">Активен</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Поръчки</span>
+                            <span class="stat-value">@user.OrdersCount</span>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Общо похарчено</span>
+                            <span class="stat-value">@user.TotalSpent.ToString("F2") €</span>
+                        </div>
+                    </div>
+
+                    <div class="user-actions">
+                        <a href="/Admin/UserOrders/@user.Id" class="action-btn pink-btn">
+                            Покупки
+                        </a>
+
+                        <a href="mailto:@user.Email?subject=Music%20%26%20Mind&body=Здравейте,%0D%0A"
+                           class="action-btn soft-btn">
+                            Съобщение
+                        </a>
+
+                        <form asp-action="ToggleEmailConfirmed" method="post" class="inline-form">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="action-btn purple-btn">
+                                @(user.EmailConfirmed ? "Премахни потвърждение" : "Потвърди имейл")
+                            </button>
+                        </form>
+
+                        <form asp-action="ToggleLockUser" method="post" class="inline-form">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="action-btn gold-btn">
+                                @(user.IsLocked ? "Отключи" : "Заключи")
+                            </button>
+                        </form>
+
+                        <form asp-action="DeleteUser"
+                              method="post"
+                              class="inline-form"
+                              onsubmit="return confirm('Наистина ли искаш да изтриеш този акаунт?');">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="action-btn red-btn">
+                                Изтрий
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
+
+<style>
+    .admin-users-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 1rem;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .admin-users-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+        .admin-users-header h1 {
+            font-size: 2.3rem;
+            font-weight: 800;
+            margin-bottom: 0.7rem;
+        }
+
+        .admin-users-header p {
+            opacity: 0.85;
+            max-width: 760px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+    .empty-users-box {
+        max-width: 700px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 2rem;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 18px rgba(255, 105, 180, 0.12);
+        backdrop-filter: blur(6px);
+    }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.4rem;
+    }
+
+    .user-card {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 1.3rem;
+        padding: 1.4rem;
+        box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(6px);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+        .user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 22px rgba(255, 105, 180, 0.18);
+        }
+
+    .user-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff69b4, #b76dff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+        box-shadow: 0 0 14px rgba(255, 105, 180, 0.35);
+    }
+
+    .user-main-info h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.05rem;
+        word-break: break-word;
+    }
+
+    .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+        .status-badge.success {
+            background: rgba(74, 222, 128, 0.16);
+            color: #93f7b3;
+        }
+
+        .status-badge.warning {
+            background: rgba(250, 204, 21, 0.16);
+            color: #ffe07a;
+        }
+
+        .status-badge.danger {
+            background: rgba(255, 75, 110, 0.18);
+            color: #ff9aae;
+        }
+
+        .status-badge.info {
+            background: rgba(96, 165, 250, 0.16);
+            color: #9fd0ff;
+        }
+
+    .user-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.95rem;
+        padding: 0.9rem;
+        text-align: center;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.75;
+        margin-bottom: 0.35rem;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .user-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+    }
+
+    .inline-form {
+        display: inline;
+        margin: 0;
+    }
+
+    .action-btn {
+        border: none;
+        text-decoration: none;
+        color: #fff;
+        padding: 0.65rem 1rem;
+        border-radius: 999px;
+        font-size: 0.83rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.08);
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+    .pink-btn {
+        background: #ff69b4;
+        box-shadow: 0 0 12px rgba(255, 105, 180, 0.25);
+    }
+
+    .soft-btn {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .purple-btn {
+        background: #9b5cff;
+        box-shadow: 0 0 12px rgba(155, 92, 255, 0.22);
+    }
+
+    .gold-btn {
+        background: #d6a22a;
+        color: #111;
+        font-weight: 800;
+    }
+
+    .red-btn {
+        background: #ff4b6e;
+        box-shadow: 0 0 12px rgba(255, 75, 110, 0.22);
+    }
+
+    @@media (max-width: 768px) {
+        .admin-users-header h1 {
+            font-size: 1.9rem;
+        }
+
+        .user-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .user-actions {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+        }
+    }
+</style>
