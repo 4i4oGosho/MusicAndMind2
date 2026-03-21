@@ -20,5 +20,6 @@ namespace MusicAndMind2.Data
         // ✅ Поръчки
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<AdminNote> AdminNotes { get; set; }
     }
 }

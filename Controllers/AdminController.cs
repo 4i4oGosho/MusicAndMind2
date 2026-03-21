@@ -26,10 +26,19 @@ namespace MusicAndMind2.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string searchTerm, string filter)
         {
-            var users = _userManager.Users
-                .ToList()
+            var usersQuery = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowered = searchTerm.Trim().ToLower();
+                usersQuery = usersQuery.Where(u => u.Email != null && u.Email.ToLower().Contains(lowered));
+            }
+
+            var usersRaw = usersQuery.ToList();
+
+            var users = usersRaw
                 .Select(user => new AdminUserViewModel
                 {
                     Id = user.Id,
@@ -40,12 +49,64 @@ namespace MusicAndMind2.Controllers
                     TotalSpent = _context.Orders
                         .Where(o => o.UserId == user.Id)
                         .SelectMany(o => o.Items)
-                        .Sum(i => (decimal?)i.UnitPrice * i.Quantity) ?? 0
+                        .Sum(i => (decimal?)i.UnitPrice * i.Quantity) ?? 0,
+                    AdminNote = _context.AdminNotes
+                        .Where(n => n.UserId == user.Id)
+                        .Select(n => n.Note)
+                        .FirstOrDefault() ?? ""
                 })
+                .ToList();
+
+            switch (filter)
+            {
+                case "locked":
+                    users = users.Where(u => u.IsLocked).ToList();
+                    break;
+
+                case "unconfirmed":
+                    users = users.Where(u => !u.EmailConfirmed).ToList();
+                    break;
+
+                case "withorders":
+                    users = users.Where(u => u.OrdersCount > 0).ToList();
+                    break;
+            }
+
+            users = users
                 .OrderBy(u => u.Email)
                 .ToList();
 
+            ViewBag.CurrentSearch = searchTerm ?? "";
+            ViewBag.CurrentFilter = filter ?? "";
+
             return View(users);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveAdminNote(string userId, string note)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return RedirectToAction(nameof(Index));
+
+            var existingNote = _context.AdminNotes.FirstOrDefault(n => n.UserId == userId);
+
+            if (existingNote == null)
+            {
+                _context.AdminNotes.Add(new AdminNote
+                {
+                    UserId = userId,
+                    Note = note ?? ""
+                });
+            }
+            else
+            {
+                existingNote.Note = note ?? "";
+                _context.AdminNotes.Update(existingNote);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -57,15 +118,14 @@ namespace MusicAndMind2.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
+            var relatedNote = _context.AdminNotes.FirstOrDefault(n => n.UserId == id);
+            if (relatedNote != null)
             {
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
-
-                return RedirectToAction(nameof(Index));
+                _context.AdminNotes.Remove(relatedNote);
+                await _context.SaveChangesAsync();
             }
 
+            var result = await _userManager.DeleteAsync(user);
             return RedirectToAction(nameof(Index));
         }
 
@@ -96,13 +156,9 @@ namespace MusicAndMind2.Controllers
             var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
 
             if (isLocked)
-            {
                 user.LockoutEnd = null;
-            }
             else
-            {
                 user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
-            }
 
             await _userManager.UpdateAsync(user);
 

@@ -8,5 +8,6 @@
         public bool IsLocked { get; set; }
         public int OrdersCount { get; set; }
         public decimal TotalSpent { get; set; }
+        public string AdminNote { get; set; } = string.Empty;
     }
 }

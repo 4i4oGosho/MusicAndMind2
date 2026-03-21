@@ -2,20 +2,71 @@
 
 @{
     ViewData["Title"] = "Регистрирани акаунти";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+    var currentFilter = ViewBag.CurrentFilter as string ?? "";
 }
 
 <div class="admin-users-page">
     <div class="admin-users-header">
         <h1>Управление на потребители</h1>
         <p>
-            Тук можеш да следиш потребителите, поръчките им и да управляваш достъпа им до системата.
+            Преглеждай акаунтите, филтрирай ги, изпращай съобщения и добавяй админ бележки.
         </p>
     </div>
+
+    <form method="get" asp-action="Index" class="admin-toolbar">
+        <input type="text"
+               name="searchTerm"
+               value="@currentSearch"
+               class="admin-search"
+               placeholder="Търси по имейл..." />
+
+        <select name="filter" class="admin-filter">
+            @if (string.IsNullOrWhiteSpace(currentFilter))
+            {
+                <option value="" selected>Всички потребители</option>
+            }
+            else
+            {
+                <option value="">Всички потребители</option>
+            }
+
+            @if (currentFilter == "locked")
+            {
+                <option value="locked" selected>Само заключени</option>
+            }
+            else
+            {
+                <option value="locked">Само заключени</option>
+            }
+
+            @if (currentFilter == "unconfirmed")
+            {
+                <option value="unconfirmed" selected>Само непотвърдени</option>
+            }
+            else
+            {
+                <option value="unconfirmed">Само непотвърдени</option>
+            }
+
+            @if (currentFilter == "withorders")
+            {
+                <option value="withorders" selected>Само с поръчки</option>
+            }
+            else
+            {
+                <option value="withorders">Само с поръчки</option>
+            }
+        </select>
+
+        <button type="submit" class="toolbar-btn">Приложи</button>
+        <a href="/Admin" class="toolbar-clear">Изчисти</a>
+    </form>
 
     @if (!Model.Any())
     {
         <div class="empty-users-box">
-            Няма регистрирани потребители в системата.
+            Няма намерени потребители по зададените критерии.
         </div>
     }
     else
@@ -68,6 +119,15 @@
                         </div>
                     </div>
 
+                    <form asp-action="SaveAdminNote" method="post" class="note-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <textarea name="note"
+                          class="admin-note"
+                          placeholder="Админ бележка за този потребител...">@user.AdminNote</textarea>
+                        <button type="submit" class="save-note-btn">Запази бележка</button>
+                    </form>
+
                     <div class="user-actions">
                         <a href="/Admin/UserOrders/@user.Id" class="action-btn pink-btn">
                             Покупки
@@ -79,13 +139,15 @@
                         </a>
 
                         <form asp-action="ToggleEmailConfirmed" method="post" class="inline-form">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@user.Id" />
                             <button type="submit" class="action-btn purple-btn">
-                                @(user.EmailConfirmed ? "Премахни потвърждение" : "Потвърди имейл")
+                                @(user.EmailConfirmed ? "Махни потвърждение" : "Потвърди имейл")
                             </button>
                         </form>
 
                         <form asp-action="ToggleLockUser" method="post" class="inline-form">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@user.Id" />
                             <button type="submit" class="action-btn gold-btn">
                                 @(user.IsLocked ? "Отключи" : "Заключи")
@@ -96,6 +158,7 @@
                               method="post"
                               class="inline-form"
                               onsubmit="return confirm('Наистина ли искаш да изтриеш този акаунт?');">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@user.Id" />
                             <button type="submit" class="action-btn red-btn">
                                 Изтрий
@@ -110,7 +173,7 @@
 
 <style>
     .admin-users-page {
-        max-width: 1200px;
+        max-width: 1250px;
         margin: 0 auto;
         padding: 3rem 1rem;
         color: #fff;
@@ -119,7 +182,7 @@
 
     .admin-users-header {
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
 
         .admin-users-header h1 {
@@ -135,6 +198,68 @@
             line-height: 1.6;
         }
 
+    .admin-toolbar {
+        max-width: 900px;
+        margin: 0 auto 2rem auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .admin-search,
+    .admin-filter {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 0.9rem;
+        padding: 0.85rem 1rem;
+        min-width: 240px;
+        outline: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(6px);
+    }
+
+    .admin-search {
+        width: 100%;
+        max-width: 420px;
+    }
+
+        .admin-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+    .admin-filter option {
+        color: #000;
+    }
+
+    .admin-search:focus,
+    .admin-filter:focus {
+        border-color: #ff69b4;
+        box-shadow: 0 0 12px rgba(255, 105, 180, 0.25);
+    }
+
+    .toolbar-btn,
+    .toolbar-clear {
+        background: rgba(255, 105, 180, 0.18);
+        color: #fff;
+        border: 1px solid rgba(255, 105, 180, 0.35);
+        border-radius: 0.8rem;
+        padding: 0.8rem 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .toolbar-btn:hover,
+        .toolbar-clear:hover {
+            background: #ff69b4;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.25);
+        }
+
     .empty-users-box {
         max-width: 700px;
         margin: 0 auto;
@@ -148,7 +273,7 @@
 
     .users-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
         gap: 1.4rem;
     }
 
@@ -174,9 +299,9 @@
     }
 
     .user-avatar {
-        width: 52px;
-        height: 52px;
-        min-width: 52px;
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
         border-radius: 50%;
         background: linear-gradient(135deg, #ff69b4, #b76dff);
         display: flex;
@@ -256,6 +381,51 @@
         color: #fff;
     }
 
+    .note-form {
+        margin-bottom: 1rem;
+    }
+
+    .admin-note {
+        width: 100%;
+        min-height: 90px;
+        resize: vertical;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        border-radius: 1rem;
+        padding: 0.9rem 1rem;
+        outline: none;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 0.7rem;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+        .admin-note:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 12px rgba(255, 105, 180, 0.18);
+        }
+
+        .admin-note::placeholder {
+            color: rgba(255,255,255,0.55);
+        }
+
+    .save-note-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 999px;
+        padding: 0.65rem 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+        .save-note-btn:hover {
+            background: #ff69b4;
+            transform: translateY(-2px);
+        }
+
     .user-actions {
         display: flex;
         flex-wrap: wrap;
@@ -326,8 +496,14 @@
             flex-direction: column;
         }
 
-        .action-btn {
+        .action-btn,
+        .save-note-btn,
+        .toolbar-btn,
+        .toolbar-clear,
+        .admin-filter,
+        .admin-search {
             width: 100%;
+            max-width: 100%;
         }
     }
 </style>
