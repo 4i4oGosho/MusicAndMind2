@@ -467,6 +467,26 @@
                 padding: 10px;
                 cursor: pointer;
             }
+
+        html, body {
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main.container {
+            flex: 1;
+            width: 100%;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
     </style>
 
     <script>
