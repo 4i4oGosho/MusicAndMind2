@@ -381,5 +381,132 @@
     </script>
 
     @RenderSection("Scripts", required: false)
+
+    <!-- 🤖 AI Chat Button -->
+    <div id="ai-button" onclick="toggleAI()">💬</div>
+
+    <!-- 💗 AI Chat Box -->
+    <div id="ai-chat">
+        <div class="ai-header">Music & Mind Асистент 🌸</div>
+        <div id="ai-messages" class="ai-messages"></div>
+
+        <div class="ai-input-box">
+            <input id="ai-input" placeholder="Попитай за продукт, спокойствие или концентрация..." />
+            <button onclick="sendAI()">➤</button>
+        </div>
+    </div>
+
+    <style>
+        #ai-button {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background: #ff69b4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255,105,180,0.6);
+            z-index: 9999;
+            transition: 0.3s;
+        }
+
+            #ai-button:hover {
+                transform: scale(1.1);
+                background: #ff85c0;
+            }
+
+        #ai-chat {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            width: 300px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255,105,180,0.3);
+            z-index: 9999;
+        }
+
+        .ai-header {
+            background: #ff69b4;
+            padding: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .ai-messages {
+            padding: 10px;
+            height: 250px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+
+        .ai-input-box {
+            display: flex;
+        }
+
+            .ai-input-box input {
+                flex: 1;
+                border: none;
+                padding: 10px;
+                outline: none;
+            }
+
+            .ai-input-box button {
+                background: #ff69b4;
+                border: none;
+                color: white;
+                padding: 10px;
+                cursor: pointer;
+            }
+    </style>
+
+    <script>
+                function toggleAI() {
+            const chat = document.getElementById("ai-chat");
+            const messages = document.getElementById("ai-messages");
+
+            const isOpening = chat.style.display !== "flex";
+            chat.style.display = isOpening ? "flex" : "none";
+
+            if (isOpening && messages.innerHTML.trim() === "") {
+                addMessage("Асистент", "Здравей и добре дошъл в Music & Mind 🌸 Аз съм тук, за да ти помогна да откриеш най-подходящите продукти за спокойствие, фокус и хармония.");
+            }
+        }
+
+        function sendAI() {
+            const input = document.getElementById("ai-input");
+            const msg = input.value;
+
+            if (!msg) return;
+
+            addMessage("Ти", msg);
+            input.value = "";
+
+            fetch("/api/ai/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(msg)
+            })
+            .then(r => r.text())
+            .then(res => {
+                addMessage("AI", res);
+            });
+        }
+
+        function addMessage(sender, text) {
+            const box = document.getElementById("ai-messages");
+            box.innerHTML += `<div><b>${sender}:</b> ${text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
 </body>
 </html>
