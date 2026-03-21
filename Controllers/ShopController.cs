@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MusicAndMind2.Data;
-using MusicAndMind2.Models;
 
 namespace MusicAndMind2.Controllers
 {
@@ -14,19 +12,74 @@ namespace MusicAndMind2.Controllers
             _context = context;
         }
 
-        // 🛒 Магазин – показва САМО наличните продукти
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string searchTerm, string category, string sortOrder)
         {
-            var products = _context.Products
+            var query = _context.Products
                 .Where(p => p.IsAvailable)
-                .OrderByDescending(p => p.CreatedAt)
+                .AsQueryable();
+
+            // Търсене
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var loweredSearch = searchTerm.ToLower();
+
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(loweredSearch) ||
+                    (p.Description != null && p.Description.ToLower().Contains(loweredSearch)) ||
+                    (p.LongDescription != null && p.LongDescription.ToLower().Contains(loweredSearch)) ||
+                    (p.Category != null && p.Category.ToLower().Contains(loweredSearch)) ||
+                    (p.FrequencyInfo != null && p.FrequencyInfo.ToLower().Contains(loweredSearch))
+                );
+            }
+
+            // Филтър по категория
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                query = query.Where(p => p.Category != null && p.Category == category);
+            }
+
+            // Сортиране
+            switch (sortOrder)
+            {
+                case "price_asc":
+                    query = query.OrderBy(p => p.Price);
+                    break;
+
+                case "price_desc":
+                    query = query.OrderByDescending(p => p.Price);
+                    break;
+
+                case "name_asc":
+                    query = query.OrderBy(p => p.Name);
+                    break;
+
+                case "oldest":
+                    query = query.OrderBy(p => p.CreatedAt);
+                    break;
+
+                default:
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                    break;
+            }
+
+            var products = query.ToList();
+
+            var categories = _context.Products
+                .Where(p => p.IsAvailable && !string.IsNullOrWhiteSpace(p.Category))
+                .Select(p => p.Category!)
+                .Distinct()
+                .OrderBy(c => c)
                 .ToList();
+
+            ViewBag.Categories = categories;
+            ViewBag.CurrentSearch = searchTerm;
+            ViewBag.CurrentCategory = category;
+            ViewBag.CurrentSort = sortOrder;
 
             return View(products);
         }
 
-        // 🔍 Детайли за продукт
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -39,7 +92,6 @@ namespace MusicAndMind2.Controllers
             return View(product);
         }
 
-        // 💳 Поръчка (визуална)
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult Checkout(int productId, string paymentMethod)
@@ -64,7 +116,6 @@ namespace MusicAndMind2.Controllers
             return RedirectToAction(nameof(Success));
         }
 
-        // ✅ Успешна покупка
         [HttpGet]
         public IActionResult Success()
         {
