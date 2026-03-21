@@ -26,17 +26,21 @@ namespace MusicAndMind2.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string searchTerm, string filter)
+        public async Task<IActionResult> Index(string searchTerm, string filter)
         {
-            var usersQuery = _userManager.Users.AsQueryable();
+            var allUsers = _userManager.Users.ToList();
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminIds = adminUsers.Select(a => a.Id).ToHashSet();
+
+            var usersRaw = allUsers
+                .Where(u => !adminIds.Contains(u.Id))
+                .AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var lowered = searchTerm.Trim().ToLower();
-                usersQuery = usersQuery.Where(u => u.Email != null && u.Email.ToLower().Contains(lowered));
+                usersRaw = usersRaw.Where(u => u.Email != null && u.Email.ToLower().Contains(lowered));
             }
-
-            var usersRaw = usersQuery.ToList();
 
             var users = usersRaw
                 .Select(user => new AdminUserViewModel
@@ -72,9 +76,7 @@ namespace MusicAndMind2.Controllers
                     break;
             }
 
-            users = users
-                .OrderBy(u => u.Email)
-                .ToList();
+            users = users.OrderBy(u => u.Email).ToList();
 
             ViewBag.CurrentSearch = searchTerm ?? "";
             ViewBag.CurrentFilter = filter ?? "";
@@ -118,6 +120,9 @@ namespace MusicAndMind2.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction(nameof(Index));
+
             var relatedNote = _context.AdminNotes.FirstOrDefault(n => n.UserId == id);
             if (relatedNote != null)
             {
@@ -125,7 +130,7 @@ namespace MusicAndMind2.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var result = await _userManager.DeleteAsync(user);
+            await _userManager.DeleteAsync(user);
             return RedirectToAction(nameof(Index));
         }
 
@@ -137,6 +142,9 @@ namespace MusicAndMind2.Controllers
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction(nameof(Index));
 
             user.EmailConfirmed = !user.EmailConfirmed;
             await _userManager.UpdateAsync(user);
@@ -152,6 +160,9 @@ namespace MusicAndMind2.Controllers
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction(nameof(Index));
 
             var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
 
